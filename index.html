@@ -26,10 +26,11 @@
             align-items: center;
             text-align: center;
             transition: background-color 1s ease;
+            touch-action: none; /* Prevents mobile scrolling while dragging canvas */
         }
 
         /* Branding & Themes */
-        .brand-container { position: absolute; top: 30px; left: 30px; text-align: left; z-index: 20; }
+        .brand-container { position: absolute; top: 30px; left: 30px; text-align: left; z-index: 20; pointer-events: none; }
         .brand-title { font-size: 1.2rem; font-weight: 300; letter-spacing: 2px; margin: 0; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
         .brand-subtitle { font-size: 0.7rem; letter-spacing: 1px; opacity: 0.6; margin-top: 2px; }
         
@@ -43,11 +44,13 @@
             max-width: 600px;
             z-index: 10;
             transition: opacity 0.8s ease-in-out;
+            position: relative;
+            pointer-events: auto;
         }
         
         .hidden { display: none !important; opacity: 0; }
         
-        h1.prompt-text { font-weight: 300; font-size: 1.5rem; line-height: 1.6; margin-bottom: 2rem; text-shadow: 0 0 10px var(--accent-color); }
+        h1.prompt-text { font-weight: 300; font-size: 1.5rem; line-height: 1.6; margin-bottom: 2rem; text-shadow: 0 0 10px var(--accent-color); pointer-events: none; }
         
         /* Emotion Grid */
         .emotion-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
@@ -56,22 +59,29 @@
 
         /* Inputs & Buttons */
         textarea, input[type="text"] { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 1rem; font-size: 1rem; outline: none; box-sizing: border-box; transition: border 0.3s ease; }
-        textarea { height: 120px; resize: none; }
+        textarea { height: 100px; resize: none; margin-bottom: 10px; }
         textarea:focus, input[type="text"]:focus { border: 1px solid var(--accent-color); box-shadow: 0 0 15px var(--accent-color); }
         
+        .star-label { text-align: left; font-size: 0.9rem; opacity: 0.9; margin: 10px 0 8px 5px; color: var(--star-color); pointer-events: none; }
+
         button.action-btn { margin-top: 2rem; background: transparent; color: var(--star-color); border: 1px solid var(--accent-color); padding: 12px 30px; border-radius: 30px; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); }
         button.action-btn:hover { background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 20px var(--accent-color); }
 
         .secondary-btn { border-color: rgba(255,255,255,0.3); color: white; box-shadow: none; margin-top: 1rem; padding: 8px 20px; font-size: 0.9rem; }
         .secondary-btn:hover { border-color: white; }
 
-        #cosmos-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        /* Interactive Canvas */
+        #cosmos-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; cursor: grab; }
+        #cosmos-canvas:active { cursor: grabbing; }
 
         /* Map Controls & Links */
         .map-controls { display: flex; justify-content: center; gap: 15px; margin-top: 10px; z-index: 20; position: relative; }
         .action-links { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; z-index: 20; position: relative; }
         .action-links a { color: white; text-decoration: none; padding: 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 0.9rem; transition: all 0.3s; }
         .action-links a:hover { background: rgba(255,255,255,0.1); border-color: var(--accent-color); }
+
+        #final-editor { margin-top: 150px; pointer-events: auto; }
+        .drag-hint { font-size: 0.8rem; opacity: 0.6; margin-bottom: 20px; font-style: italic; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -88,6 +98,7 @@
         <button class="theme-btn" onclick="setTheme('desert', this)">Desert Night</button>
     </div>
 
+    <!-- The Canvas is now interactive -->
     <canvas id="cosmos-canvas"></canvas>
 
     <!-- Node 1: Welcome & Emotion -->
@@ -101,35 +112,37 @@
         </div>
     </div>
 
-    <!-- Node 2: Dynamic Socratic Engine -->
+    <!-- Node 2: Dynamic Socratic Engine with Optional Star -->
     <div id="node-questions" class="node-container hidden">
         <h1 class="prompt-text" id="socratic-prompt">Loading...</h1>
+        
         <textarea id="user-thought" placeholder="Let it out into the void..."></textarea>
+        
+        <div class="star-label">✨ Extract a positive truth (Optional):</div>
+        <input type="text" id="question-star" placeholder="A single step, a calming truth, or a boundary..." maxlength="60">
+        
         <br>
         <button class="action-btn" id="next-btn">Release</button>
     </div>
 
-    <!-- Node 3: The Takeaway (Star Creation) -->
-    <div id="node-takeaway" class="node-container hidden">
-        <h1 class="prompt-text">You have mapped the dark. Now, what is one small truth or action you can hold onto?</h1>
-        <input type="text" id="star-thought" placeholder="A single step, a calming truth, or a boundary..." maxlength="60">
-        <br>
-        <button class="action-btn" id="forge-btn" onclick="forgeStar()">Forge This Star</button>
-    </div>
-
-    <!-- Node 4: Final MindCosmo (Black Hole) -->
-    <div id="node-final" class="node-container hidden">
-        <h1 class="prompt-text">The gravity of the problem remains, but your star now orbits it. You are not consumed.</h1>
+    <!-- Node 3: Final MindCosmo (Live Editable) -->
+    <div id="node-final" class="node-container hidden" style="pointer-events: none;">
         
-        <div class="map-controls">
-            <button class="action-btn secondary-btn" onclick="editStar()">Edit Text</button>
-            <button class="action-btn secondary-btn" onclick="saveMindCosmo()">Save MindCosmo</button>
-        </div>
+        <div id="final-editor">
+            <div class="drag-hint">(Drag the core and stars to shape your universe)</div>
+            
+            <div class="star-label" style="text-align: center; font-size: 1.1rem; margin-bottom: 15px;">Name the core of your new universe:</div>
+            <input type="text" id="live-core-input" placeholder="A calming truth, action, or realization..." maxlength="60">
+            
+            <div class="map-controls">
+                <button class="action-btn secondary-btn" onclick="saveMindCosmo()">Save MindCosmo</button>
+            </div>
 
-        <div class="action-links">
-            <a href="#" target="_blank">☕ Support this sanctuary (Buy Me a Coffee)</a>
-            <a href="#" target="_blank">🌌 Talk to a professional (BetterHelp)</a>
-            <a href="/blog">📖 Read our stories</a>
+            <div class="action-links">
+                <a href="#" target="_blank">☕ Support this sanctuary (Buy Me a Coffee)</a>
+                <a href="#" target="_blank">🌌 Talk to a professional (BetterHelp)</a>
+                <a href="/blog">📖 Read our stories</a>
+            </div>
         </div>
     </div>
 
@@ -150,7 +163,7 @@
             document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
             drawBackgroundStars();
-            if(finalStarText) drawMindCosmo(); // Redraw MindCosmo if active
+            if(isFinalScreen) drawMindCosmo();
         }
 
         // --- QUESTION DATABASE ---
@@ -180,14 +193,19 @@
         let currentPath = [];
         let currentStep = 0;
         let finalStarText = "";
+        let collectedStars = [];
+        let isFinalScreen = false;
 
         // UI Elements
         const nodeWelcome = document.getElementById('node-welcome');
         const nodeQuestions = document.getElementById('node-questions');
-        const nodeTakeaway = document.getElementById('node-takeaway');
         const nodeFinal = document.getElementById('node-final');
         const promptElement = document.getElementById('socratic-prompt');
         const inputElement = document.getElementById('user-thought');
+        const questionStarInput = document.getElementById('question-star');
+        const liveCoreInput = document.getElementById('live-core-input');
+        const canvas = document.getElementById('cosmos-canvas');
+        const ctx = canvas.getContext('2d');
 
         function transition(hideNode, showNode, callback) {
             hideNode.style.opacity = 0;
@@ -202,12 +220,22 @@
         function startJourney(emotion) {
             currentPath = questionPaths[emotion];
             currentStep = 0;
+            collectedStars = [];
+            finalStarText = "";
+            isFinalScreen = false;
+            liveCoreInput.value = ""; 
             promptElement.innerText = currentPath[currentStep];
+            canvas.style.pointerEvents = 'none'; // Disable canvas dragging initially
             transition(nodeWelcome, nodeQuestions);
         }
 
         document.getElementById('next-btn').addEventListener('click', () => {
             if (inputElement.value.trim() === "") return;
+            
+            if (questionStarInput.value.trim() !== "") {
+                collectedStars.push(questionStarInput.value.trim());
+            }
+
             currentStep++;
             nodeQuestions.style.opacity = 0;
             
@@ -215,29 +243,27 @@
                 if (currentStep < currentPath.length) {
                     promptElement.innerText = currentPath[currentStep];
                     inputElement.value = "";
+                    questionStarInput.value = "";
                     nodeQuestions.style.opacity = 1;
                 } else {
                     nodeQuestions.classList.add('hidden');
-                    nodeTakeaway.classList.remove('hidden');
-                    setTimeout(() => nodeTakeaway.style.opacity = 1, 50);
+                    nodeFinal.classList.remove('hidden');
+                    setTimeout(() => nodeFinal.style.opacity = 1, 50);
+                    isFinalScreen = true;
+                    canvas.style.pointerEvents = 'auto'; // Enable dragging!
+                    initMindCosmoPhysics();
+                    drawMindCosmo();
                 }
             }, 500);
         });
 
-        function forgeStar() {
-            const starInput = document.getElementById('star-thought');
-            if (starInput.value.trim() === "") return;
-            finalStarText = starInput.value.trim();
-            transition(nodeTakeaway, nodeFinal, drawMindCosmo);
-        }
-
-        function editStar() {
-            finalStarText = ""; 
-            transition(nodeFinal, nodeTakeaway, drawBackgroundStars);
-        }
+        // LIVE EDITING THE CORE STAR
+        liveCoreInput.addEventListener('input', (e) => {
+            finalStarText = e.target.value;
+            drawMindCosmo(); 
+        });
 
         function saveMindCosmo() {
-            // Create a temporary background so the PNG isn't transparent
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = canvas.width;
             tempCanvas.height = canvas.height;
@@ -247,21 +273,121 @@
             tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
             tCtx.drawImage(canvas, 0, 0);
 
-            // Trigger download
             const link = document.createElement('a');
             link.download = 'My-MindCosmo.png';
             link.href = tempCanvas.toDataURL('image/png');
             link.click();
         }
 
-        // --- CANVAS ENGINE (MINDCOSMO) ---
-        const canvas = document.getElementById('cosmos-canvas');
-        const ctx = canvas.getContext('2d');
+        // --- INTERACTIVE CANVAS ENGINE ---
+        let coreNode = { x: 0, y: 0 };
+        let starNodes = [];
+        
+        // Dragging State
+        let isDragging = false;
+        let draggedNode = null; // 'core' or index of star
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+
+        function initMindCosmoPhysics() {
+            coreNode.x = canvas.width / 2;
+            coreNode.y = canvas.height / 2 - 120;
+            
+            starNodes = [];
+            if (collectedStars.length > 0) {
+                const radius = 140; 
+                collectedStars.forEach((starText, index) => {
+                    const angle = (Math.PI * 2 / collectedStars.length) * index - (Math.PI / 2); 
+                    starNodes.push({
+                        text: starText,
+                        x: coreNode.x + Math.cos(angle) * radius,
+                        y: coreNode.y + Math.sin(angle) * radius
+                    });
+                });
+            }
+        }
+
+        // Mouse & Touch Events
+        function getPos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX = evt.clientX;
+            let clientY = evt.clientY;
+            if (evt.touches && evt.touches.length > 0) {
+                clientX = evt.touches[0].clientX;
+                clientY = evt.touches[0].clientY;
+            }
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function handleDragStart(e) {
+            if (!isFinalScreen) return;
+            const pos = getPos(e);
+
+            // Check if Core was clicked
+            if (Math.hypot(pos.x - coreNode.x, pos.y - coreNode.y) < 50) {
+                isDragging = true;
+                draggedNode = 'core';
+                dragOffsetX = pos.x - coreNode.x;
+                dragOffsetY = pos.y - coreNode.y;
+                return;
+            }
+
+            // Check if any Star was clicked
+            for (let i = 0; i < starNodes.length; i++) {
+                if (Math.hypot(pos.x - starNodes[i].x, pos.y - starNodes[i].y) < 30) {
+                    isDragging = true;
+                    draggedNode = i;
+                    dragOffsetX = pos.x - starNodes[i].x;
+                    dragOffsetY = pos.y - starNodes[i].y;
+                    return;
+                }
+            }
+        }
+
+        function handleDragMove(e) {
+            if (!isDragging) return;
+            e.preventDefault(); // Stop mobile scrolling while dragging
+            const pos = getPos(e);
+
+            if (draggedNode === 'core') {
+                coreNode.x = pos.x - dragOffsetX;
+                coreNode.y = pos.y - dragOffsetY;
+            } else if (draggedNode !== null) {
+                starNodes[draggedNode].x = pos.x - dragOffsetX;
+                starNodes[draggedNode].y = pos.y - dragOffsetY;
+            }
+            drawMindCosmo();
+        }
+
+        function handleDragEnd() {
+            isDragging = false;
+            draggedNode = null;
+        }
+
+        canvas.addEventListener('mousedown', handleDragStart);
+        canvas.addEventListener('mousemove', handleDragMove);
+        window.addEventListener('mouseup', handleDragEnd); // Catch outside drops
+        canvas.addEventListener('touchstart', handleDragStart, {passive: false});
+        canvas.addEventListener('touchmove', handleDragMove, {passive: false});
+        window.addEventListener('touchend', handleDragEnd);
 
         function resizeCanvas() {
+            const oldW = canvas.width;
+            const oldH = canvas.height;
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            if(finalStarText) { drawMindCosmo(); } else { drawBackgroundStars(); }
+            
+            // Keep nodes relative to screen resize
+            if(isFinalScreen) { 
+                const dx = (canvas.width - oldW) / 2;
+                const dy = (canvas.height - oldH) / 2;
+                coreNode.x += dx;
+                coreNode.y += dy;
+                starNodes.forEach(s => { s.x += dx; s.y += dy; });
+                drawMindCosmo(); 
+            } else { 
+                drawBackgroundStars(); 
+            }
         }
 
         function drawBackgroundStars() {
@@ -279,57 +405,89 @@
 
         function drawMindCosmo() {
             drawBackgroundStars();
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2 - 50; 
+            
             const currentAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+            const currentStarColor = getComputedStyle(document.documentElement).getPropertyValue('--star-color').trim();
 
-            // 1. Draw the Black Hole
-            const gradient = ctx.createRadialGradient(cx, cy, 10, cx, cy, 120);
-            gradient.addColorStop(0, '#000000'); 
-            gradient.addColorStop(0.5, currentAccentColor); 
-            gradient.addColorStop(1, 'transparent');
+            // 1. Draw connection lines between Core and Stars (Mind Map effect)
+            starNodes.forEach(star => {
+                ctx.beginPath();
+                ctx.setLineDash([5, 10]);
+                ctx.strokeStyle = currentStarColor;
+                ctx.globalAlpha = 0.4;
+                ctx.moveTo(coreNode.x, coreNode.y);
+                ctx.lineTo(star.x, star.y);
+                ctx.stroke();
+            });
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 1.0;
+
+            // 2. Draw the Positive Glowing Core
+            const gradient = ctx.createRadialGradient(coreNode.x, coreNode.y, 5, coreNode.x, coreNode.y, 180);
+            gradient.addColorStop(0, '#ffffff'); 
+            gradient.addColorStop(0.2, currentAccentColor); 
+            gradient.addColorStop(1, 'transparent'); 
             
             ctx.fillStyle = gradient;
-            ctx.globalAlpha = 0.5;
+            ctx.globalAlpha = 0.6;
             ctx.beginPath();
-            ctx.arc(cx, cy, 120, 0, Math.PI * 2);
+            ctx.arc(coreNode.x, coreNode.y, 180, 0, Math.PI * 2);
             ctx.fill();
             ctx.globalAlpha = 1.0;
             
-            ctx.fillStyle = '#000';
-            ctx.beginPath();
-            ctx.arc(cx, cy, 40, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 2. Draw the Orbiting Star
-            const starX = cx + 160;
-            const starY = cy - 40;
-            
-            ctx.beginPath();
-            ctx.setLineDash([5, 10]);
-            ctx.strokeStyle = currentAccentColor;
-            ctx.arc(cx, cy, Math.sqrt(Math.pow(160,2) + Math.pow(40,2)), 0, Math.PI*2);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            ctx.beginPath();
-            ctx.arc(starX, starY, 6, 0, Math.PI * 2);
             ctx.fillStyle = '#ffffff';
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 30;
             ctx.shadowColor = currentAccentColor;
+            ctx.beginPath();
+            ctx.arc(coreNode.x, coreNode.y, 12, 0, Math.PI * 2);
             ctx.fill();
-            ctx.shadowBlur = 0; 
+            ctx.shadowBlur = 0;
 
-            // 3. Draw the Takeaway Text
-            ctx.fillStyle = '#ffffff';
-            ctx.font = "1rem 'Segoe UI'";
-            ctx.textAlign = "left";
-            ctx.fillText(finalStarText, starX + 15, starY + 4);
-            
-            ctx.fillStyle = 'rgba(255,255,255,0.5)';
-            ctx.textAlign = "center";
-            ctx.font = "0.8rem 'Segoe UI'";
-            ctx.fillText("The Weight", cx, cy + 5);
+            // 3. Draw Orbit Rings tracking the Core
+            for (let i = 1; i <= 3; i++) {
+                ctx.beginPath();
+                ctx.setLineDash([5, 15]);
+                ctx.strokeStyle = currentStarColor;
+                ctx.globalAlpha = 0.3 / i; 
+                ctx.arc(coreNode.x, coreNode.y, 65 * i, 0, Math.PI*2);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 1.0;
+
+            // 4. Draw the Final Takeaway Core Text
+            if (finalStarText) {
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "1.2rem 'Segoe UI'";
+                ctx.textAlign = "center";
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#000000'; 
+                ctx.fillText(finalStarText, coreNode.x, coreNode.y + 40);
+                
+                ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                ctx.font = "0.8rem 'Segoe UI'";
+                ctx.fillText("Your MindCosmo Core", coreNode.x, coreNode.y + 65);
+                ctx.shadowBlur = 0; 
+            }
+
+            // 5. Draw the Interactive Question Stars
+            starNodes.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = currentAccentColor;
+                ctx.fill();
+                ctx.shadowBlur = 0; 
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "0.85rem 'Segoe UI'";
+                ctx.textAlign = "center";
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = '#000000';
+                ctx.fillText(star.text, star.x, star.y + 20);
+                ctx.shadowBlur = 0;
+            });
         }
 
         window.addEventListener('resize', resizeCanvas);
