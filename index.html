@@ -68,7 +68,7 @@
         button.action-btn:hover { background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 20px var(--accent-color); }
 
         /* Interactive Canvas */
-        #cosmos-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; cursor: grab; }
+        #cosmos-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; cursor: grab; transition: opacity 1s ease; }
         #cosmos-canvas:active { cursor: grabbing; }
 
         /* Floating Edit Input for Stars */
@@ -190,7 +190,6 @@
             root.style.setProperty('--accent-color', themes[themeName].accent);
             document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
-            if(!isFinalScreen) drawBackgroundStars();
         }
 
         // --- QUESTION DATABASE & CORE LABELS ---
@@ -284,7 +283,6 @@
                     isFinalScreen = true;
                     canvas.style.pointerEvents = 'auto'; 
                     initMindCosmoPhysics();
-                    requestAnimationFrame(animateCanvas); // Start the breathing animation
                 }
             }, 500);
         });
@@ -306,7 +304,7 @@
             link.click();
 
             // Transition to Exit Node
-            isFinalScreen = false; // Stop animation loop
+            isFinalScreen = false; // Stops drawing the heavy core/orbits, returns to drifting background
             nodeCanvasUI.classList.add('hidden');
             canvas.style.opacity = 0.2; // Dim background for exit screen
             canvas.style.pointerEvents = 'none';
@@ -317,15 +315,31 @@
             }, 500);
         }
 
-        // --- INTERACTIVE CANVAS ENGINE & ANIMATION ---
+        // --- INTERACTIVE CANVAS ENGINE & LIVE ANIMATION ---
         let coreNode = { x: 0, y: 0 };
         let starNodes = [];
-        let time = 0; // For breathing animation
+        let bgStars = [];
+        let time = 0; 
         
         let isDragging = false;
         let draggedNode = null; 
         let dragOffsetX = 0, dragOffsetY = 0;
         let dragStartX = 0, dragStartY = 0;
+
+        function generateBgStars() {
+            bgStars = [];
+            for(let i = 0; i < 150; i++) {
+                bgStars.push({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    r: Math.random() * 1.5,
+                    alpha: Math.random() * 0.8 + 0.2,
+                    vx: (Math.random() - 0.5) * 0.2, // Slow horizontal drift
+                    vy: (Math.random() - 0.5) * 0.2, // Slow vertical drift
+                    dAlpha: (Math.random() - 0.5) * 0.02 // Twinkling speed
+                });
+            }
+        }
 
         function initMindCosmoPhysics() {
             coreNode.x = canvas.width / 2;
@@ -398,12 +412,10 @@
         function handleDragEnd(e) {
             if(!isDragging && !isFinalScreen) return;
             
-            // Distinguish between a drag and a click
             const pos = getPos(e.changedTouches ? e.changedTouches[0] : e);
             const dist = Math.hypot(pos.x - dragStartX, pos.y - dragStartY);
             
             if (dist < 5 && draggedNode !== 'core' && draggedNode !== null) {
-                // It was a click on a star!
                 openStarEditor(draggedNode);
             }
 
@@ -455,33 +467,34 @@
                 coreNode.x += dx;
                 coreNode.y += dy;
                 starNodes.forEach(s => { s.x += dx; s.y += dy; });
-            } else if(!document.getElementById('node-exit').classList.contains('hidden')) {
-                // Do nothing, let it stay dim
-            } else { 
-                drawBackgroundStars(); 
             }
         }
 
-        // Background generation (drawn once unless theme changes)
-        let bgStars = [];
-        function generateBgStars() {
-            bgStars = [];
-            for(let i = 0; i < 150; i++) {
-                bgStars.push({
-                    x: Math.random() * window.innerWidth,
-                    y: Math.random() * window.innerHeight,
-                    r: Math.random() * 1.5,
-                    alpha: Math.random() * 0.8 + 0.2
-                });
-            }
-        }
-
-        function drawBackgroundStars() {
-            if(bgStars.length === 0) generateBgStars();
+        // The Universal Animation Loop
+        function animateCanvas() {
+            time += 0.03; 
+            
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const currentStarColor = getComputedStyle(document.documentElement).getPropertyValue('--star-color').trim();
-            
+            const currentAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+
+            // 1. Live Background Stars
             bgStars.forEach(s => {
+                // Move
+                s.x += s.vx;
+                s.y += s.vy;
+                
+                // Twinkle
+                s.alpha += s.dAlpha;
+                if (s.alpha > 1) { s.alpha = 1; s.dAlpha *= -1; }
+                if (s.alpha < 0.1) { s.alpha = 0.1; s.dAlpha *= -1; }
+
+                // Screen Wrap
+                if (s.x < 0) s.x = canvas.width;
+                if (s.x > canvas.width) s.x = 0;
+                if (s.y < 0) s.y = canvas.height;
+                if (s.y > canvas.height) s.y = 0;
+
                 ctx.beginPath();
                 ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
                 ctx.globalAlpha = s.alpha;
@@ -489,111 +502,104 @@
                 ctx.fill();
             });
             ctx.globalAlpha = 1.0;
-        }
 
-        // The main render loop for the breathing effect
-        function animateCanvas() {
-            if(!isFinalScreen) return; // Stop rendering when exiting
-            time += 0.03; // Controls breathing speed
-            
-            drawBackgroundStars();
-            
-            const currentAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
-            const currentStarColor = getComputedStyle(document.documentElement).getPropertyValue('--star-color').trim();
+            // 2. The Final MindCosmo (Only draws if on the final screen)
+            if (isFinalScreen) {
+                const breatheScale = 1 + Math.sin(time) * 0.05;
 
-            const breatheScale = 1 + Math.sin(time) * 0.05; // 5% fluctuation
+                // Connection lines
+                starNodes.forEach(star => {
+                    ctx.beginPath();
+                    ctx.setLineDash([2, 8]);
+                    ctx.strokeStyle = currentStarColor;
+                    ctx.globalAlpha = 0.2;
+                    ctx.moveTo(coreNode.x, coreNode.y);
+                    ctx.lineTo(star.x, star.y);
+                    ctx.stroke();
+                });
+                ctx.setLineDash([]);
+                ctx.globalAlpha = 1.0;
 
-            // Draw connection lines
-            starNodes.forEach(star => {
-                ctx.beginPath();
-                ctx.setLineDash([2, 8]);
-                ctx.strokeStyle = currentStarColor;
-                ctx.globalAlpha = 0.2;
-                ctx.moveTo(coreNode.x, coreNode.y);
-                ctx.lineTo(star.x, star.y);
-                ctx.stroke();
-            });
-            ctx.setLineDash([]);
-            ctx.globalAlpha = 1.0;
-
-            // Draw Core Aura (Breathing)
-            const gradient = ctx.createRadialGradient(coreNode.x, coreNode.y, 5, coreNode.x, coreNode.y, 220 * breatheScale);
-            gradient.addColorStop(0, 'rgba(255,255,255,0.8)'); 
-            gradient.addColorStop(0.15, currentAccentColor); 
-            gradient.addColorStop(1, 'transparent'); 
-            
-            ctx.fillStyle = gradient;
-            ctx.globalAlpha = 0.7;
-            ctx.beginPath();
-            ctx.arc(coreNode.x, coreNode.y, 220 * breatheScale, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1.0;
-            
-            // Draw Core Solid Center
-            ctx.fillStyle = '#ffffff';
-            ctx.shadowBlur = 40;
-            ctx.shadowColor = currentAccentColor;
-            ctx.beginPath();
-            ctx.arc(coreNode.x, coreNode.y, 10, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-
-            // Draw Orbit Rings
-            for (let i = 1; i <= 3; i++) {
-                ctx.beginPath();
-                ctx.strokeStyle = currentStarColor;
-                ctx.globalAlpha = 0.1 / i; 
-                ctx.arc(coreNode.x, coreNode.y, 75 * i, 0, Math.PI*2);
-                ctx.stroke();
-            }
-            ctx.globalAlpha = 1.0;
-
-            // Core Text (The assigned Emotion)
-            ctx.fillStyle = '#ffffff';
-            ctx.font = "1.1rem 'Segoe UI'";
-            ctx.textAlign = "center";
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#000000'; 
-            ctx.fillText(coreText, coreNode.x, coreNode.y + 35);
-            ctx.shadowBlur = 0; 
-
-            // Draw Stars (with breathing auras)
-            starNodes.forEach((star, index) => {
-                // Star glow
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, 15 * breatheScale, 0, Math.PI * 2);
-                const starGrad = ctx.createRadialGradient(star.x, star.y, 1, star.x, star.y, 15 * breatheScale);
-                starGrad.addColorStop(0, currentAccentColor);
-                starGrad.addColorStop(1, 'transparent');
-                ctx.fillStyle = starGrad;
-                ctx.fill();
-
-                // Star Solid Center
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, 4, 0, Math.PI * 2);
-                ctx.fillStyle = '#ffffff';
-                ctx.fill();
+                // Core Aura
+                const gradient = ctx.createRadialGradient(coreNode.x, coreNode.y, 5, coreNode.x, coreNode.y, 220 * breatheScale);
+                gradient.addColorStop(0, 'rgba(255,255,255,0.8)'); 
+                gradient.addColorStop(0.15, currentAccentColor); 
+                gradient.addColorStop(1, 'transparent'); 
                 
-                // Hide text for the specific star currently being edited
-                if(index !== editingIndex) {
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = "0.9rem 'Segoe UI'";
-                    ctx.textAlign = "center";
-                    ctx.shadowBlur = 8;
-                    ctx.shadowColor = '#000000';
-                    
-                    // Add subtle floating effect to text
-                    const floatY = Math.sin(time + index) * 3;
-                    ctx.fillText(star.text, star.x, star.y + 25 + floatY);
-                    ctx.shadowBlur = 0;
+                ctx.fillStyle = gradient;
+                ctx.globalAlpha = 0.7;
+                ctx.beginPath();
+                ctx.arc(coreNode.x, coreNode.y, 220 * breatheScale, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+                
+                // Core Center
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowBlur = 40;
+                ctx.shadowColor = currentAccentColor;
+                ctx.beginPath();
+                ctx.arc(coreNode.x, coreNode.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Orbit Rings
+                for (let i = 1; i <= 3; i++) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = currentStarColor;
+                    ctx.globalAlpha = 0.1 / i; 
+                    ctx.arc(coreNode.x, coreNode.y, 75 * i, 0, Math.PI*2);
+                    ctx.stroke();
                 }
-            });
+                ctx.globalAlpha = 1.0;
+
+                // Core Text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "1.1rem 'Segoe UI'";
+                ctx.textAlign = "center";
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#000000'; 
+                ctx.fillText(coreText, coreNode.x, coreNode.y + 35);
+                ctx.shadowBlur = 0; 
+
+                // User Stars
+                starNodes.forEach((star, index) => {
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, 15 * breatheScale, 0, Math.PI * 2);
+                    const starGrad = ctx.createRadialGradient(star.x, star.y, 1, star.x, star.y, 15 * breatheScale);
+                    starGrad.addColorStop(0, currentAccentColor);
+                    starGrad.addColorStop(1, 'transparent');
+                    ctx.fillStyle = starGrad;
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, 4, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fill();
+                    
+                    if(index !== editingIndex) {
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = "0.9rem 'Segoe UI'";
+                        ctx.textAlign = "center";
+                        ctx.shadowBlur = 8;
+                        ctx.shadowColor = '#000000';
+                        
+                        const floatY = Math.sin(time + index) * 3;
+                        ctx.fillText(star.text, star.x, star.y + 25 + floatY);
+                        ctx.shadowBlur = 0;
+                    }
+                });
+            }
 
             requestAnimationFrame(animateCanvas);
         }
 
+        // Initialize Canvas
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        generateBgStars();
+        animateCanvas(); // Start the loop immediately on load
+
         window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
     </script>
 </body>
 </html>
