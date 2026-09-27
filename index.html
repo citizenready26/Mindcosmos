@@ -48,7 +48,7 @@
             pointer-events: auto;
         }
         
-        .hidden { display: none !important; opacity: 0; }
+        .hidden { display: none !important; opacity: 0; pointer-events: none; }
         
         h1.prompt-text { font-weight: 300; font-size: 1.5rem; line-height: 1.6; margin-bottom: 2rem; text-shadow: 0 0 10px var(--accent-color); pointer-events: none; }
         
@@ -67,21 +67,46 @@
         button.action-btn { margin-top: 2rem; background: transparent; color: var(--star-color); border: 1px solid var(--accent-color); padding: 12px 30px; border-radius: 30px; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); }
         button.action-btn:hover { background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 20px var(--accent-color); }
 
-        .secondary-btn { border-color: rgba(255,255,255,0.3); color: white; box-shadow: none; margin-top: 1rem; padding: 8px 20px; font-size: 0.9rem; }
-        .secondary-btn:hover { border-color: white; }
-
         /* Interactive Canvas */
         #cosmos-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; cursor: grab; }
         #cosmos-canvas:active { cursor: grabbing; }
 
-        /* Map Controls & Links */
-        .map-controls { display: flex; justify-content: center; gap: 15px; margin-top: 10px; z-index: 20; position: relative; }
-        .action-links { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; z-index: 20; position: relative; }
-        .action-links a { color: white; text-decoration: none; padding: 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 0.9rem; transition: all 0.3s; }
-        .action-links a:hover { background: rgba(255,255,255,0.1); border-color: var(--accent-color); }
+        /* Floating Edit Input for Stars */
+        #star-edit-input {
+            position: absolute;
+            z-index: 30;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            border-bottom: 2px solid var(--accent-color);
+            color: white;
+            padding: 8px;
+            font-size: 1rem;
+            border-radius: 4px;
+            outline: none;
+            text-align: center;
+            transform: translate(-50%, -100%);
+            width: 250px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
 
-        #final-editor { margin-top: 150px; pointer-events: auto; }
-        .drag-hint { font-size: 0.8rem; opacity: 0.6; margin-bottom: 20px; font-style: italic; pointer-events: none; }
+        /* Final Canvas Overlay */
+        .canvas-overlay-btn {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Exit Screen specific */
+        .exit-icon { font-size: 3rem; margin-bottom: 20px; text-shadow: 0 0 20px var(--accent-color); }
+        .action-links { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; }
+        .action-links a { color: white; text-decoration: none; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; font-size: 1rem; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .action-links a:hover { background: rgba(255,255,255,0.1); border-color: var(--accent-color); box-shadow: 0 0 15px rgba(14, 165, 233, 0.2); }
+        .drag-hint { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); font-size: 0.85rem; opacity: 0.6; font-style: italic; pointer-events: none; z-index: 20; }
+
     </style>
 </head>
 <body>
@@ -98,9 +123,13 @@
         <button class="theme-btn" onclick="setTheme('desert', this)">Desert Night</button>
     </div>
 
+    <!-- The Canvas -->
     <canvas id="cosmos-canvas"></canvas>
+    
+    <!-- Floating Input for Click-to-Edit -->
+    <input type="text" id="star-edit-input" class="hidden" maxlength="45">
 
-    <!-- Node 1: Welcome & Emotion -->
+    <!-- Node 1: Welcome -->
     <div id="node-welcome" class="node-container">
         <h1 class="prompt-text">Welcome to your sanctuary. How is your mind feeling right now?</h1>
         <div class="emotion-grid">
@@ -111,7 +140,7 @@
         </div>
     </div>
 
-    <!-- Node 2: Dynamic Socratic Engine with Mandatory Star -->
+    <!-- Node 2: Socratic Engine -->
     <div id="node-questions" class="node-container hidden">
         <h1 class="prompt-text" id="socratic-prompt">Loading...</h1>
         
@@ -124,25 +153,25 @@
         <button class="action-btn" id="next-btn">Release</button>
     </div>
 
-    <!-- Node 3: Final MindCosmo (Live Editable) -->
-    <div id="node-final" class="node-container hidden" style="pointer-events: none;">
-        
-        <div id="final-editor">
-            <div class="drag-hint">(Drag the core and stars to shape your universe)</div>
-            
-            <div class="star-label" style="text-align: center; font-size: 1.1rem; margin-bottom: 15px;">Name the core of your new universe:</div>
-            <input type="text" id="live-core-input" placeholder="A calming truth, action, or realization..." maxlength="60">
-            
-            <div class="map-controls">
-                <button class="action-btn secondary-btn" onclick="saveMindCosmo()">Save MindCosmo</button>
-            </div>
+    <!-- Node 3: Pure MindCosmo Canvas Overlay -->
+    <div id="node-canvas-ui" class="hidden">
+        <div class="drag-hint">Drag to shape. Click a star to edit.</div>
+        <button class="action-btn canvas-overlay-btn" onclick="saveAndContinue()">Save & Continue</button>
+    </div>
 
-            <div class="action-links">
-                <a href="#" target="_blank">☕ Support this sanctuary (Buy Me a Coffee)</a>
-                <a href="#" target="_blank">🌌 Talk to a professional (BetterHelp)</a>
-                <a href="/blog">📖 Read our stories</a>
-            </div>
+    <!-- Node 4: Exit Sanctuary (Monetization) -->
+    <div id="node-exit" class="node-container hidden">
+        <div class="exit-icon">🌌</div>
+        <h1 class="prompt-text" style="font-size: 1.8rem; margin-bottom: 10px;">Your universe is safe.</h1>
+        <p style="opacity: 0.8; line-height: 1.6; margin-bottom: 30px;">Your custom MindCosmo has been downloaded to your device.<br>Return to it whenever the weight feels heavy.</p>
+        
+        <div class="action-links">
+            <a href="#" target="_blank">☕ Support this sanctuary (Buy Me a Coffee)</a>
+            <a href="#" target="_blank">🛋️ Talk to a professional (BetterHelp)</a>
+            <a href="/blog">📖 Read our stories at InMind</a>
         </div>
+        
+        <button class="action-btn secondary-btn" style="margin-top: 30px;" onclick="location.reload()">Begin a New Journey</button>
     </div>
 
     <script>
@@ -161,20 +190,19 @@
             root.style.setProperty('--accent-color', themes[themeName].accent);
             document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
-            drawBackgroundStars();
-            if(isFinalScreen) drawMindCosmo();
+            if(!isFinalScreen) drawBackgroundStars();
         }
 
-        // --- QUESTION DATABASE ---
+        // --- QUESTION DATABASE & CORE LABELS ---
         const questionPaths = {
             anxious: [
                 "What exact fear is racing through your mind right now?",
-                "Is this a proven, undeniable fact, or a projection of a worst-case scenario?",
+                "Is this a proven fact, or a projection of a worst-case scenario?",
                 "If a friend presented this exact fear to you, what grounded advice would you give them?"
             ],
             overwhelmed: [
                 "What is the heaviest weight you are carrying at this exact moment?",
-                "If you could only solve ONE tiny piece of this today, and ignore the rest, what would it be?",
+                "If you could only solve ONE tiny piece of this today, what would it be?",
                 "What can you safely delegate, delay, or drop entirely right now?"
             ],
             lost: [
@@ -185,24 +213,32 @@
             angry: [
                 "What boundary was crossed, or what expectation was broken?",
                 "Is holding onto this anger serving you, or is it burning your own energy?",
-                "How can you express this feeling constructively, or release it safely without harm?"
+                "How can you express this feeling constructively, or release it safely?"
             ]
+        };
+
+        const coreLabels = {
+            anxious: "The Anxiety",
+            overwhelmed: "The Overwhelm",
+            lost: "The Disconnection",
+            angry: "The Anger"
         };
 
         let currentPath = [];
         let currentStep = 0;
-        let finalStarText = "";
         let collectedStars = [];
+        let coreText = "";
         let isFinalScreen = false;
 
         // UI Elements
         const nodeWelcome = document.getElementById('node-welcome');
         const nodeQuestions = document.getElementById('node-questions');
-        const nodeFinal = document.getElementById('node-final');
+        const nodeCanvasUI = document.getElementById('node-canvas-ui');
+        const nodeExit = document.getElementById('node-exit');
         const promptElement = document.getElementById('socratic-prompt');
         const inputElement = document.getElementById('user-thought');
         const questionStarInput = document.getElementById('question-star');
-        const liveCoreInput = document.getElementById('live-core-input');
+        const editInput = document.getElementById('star-edit-input');
         const canvas = document.getElementById('cosmos-canvas');
         const ctx = canvas.getContext('2d');
 
@@ -218,29 +254,19 @@
 
         function startJourney(emotion) {
             currentPath = questionPaths[emotion];
+            coreText = coreLabels[emotion]; // Automatically set the Core based on emotion
             currentStep = 0;
             collectedStars = [];
-            finalStarText = "";
             isFinalScreen = false;
-            liveCoreInput.value = ""; 
             promptElement.innerText = currentPath[currentStep];
             canvas.style.pointerEvents = 'none'; 
             transition(nodeWelcome, nodeQuestions);
         }
 
         document.getElementById('next-btn').addEventListener('click', () => {
-            // Mandatory check for the void text
-            if (inputElement.value.trim() === "") {
-                inputElement.focus();
-                return; 
-            }
-            // Mandatory check for the star
-            if (questionStarInput.value.trim() === "") {
-                questionStarInput.focus();
-                return;
-            }
+            if (inputElement.value.trim() === "") { inputElement.focus(); return; }
+            if (questionStarInput.value.trim() === "") { questionStarInput.focus(); return; }
             
-            // Save the newly mandatory star
             collectedStars.push(questionStarInput.value.trim());
 
             currentStep++;
@@ -254,23 +280,17 @@
                     nodeQuestions.style.opacity = 1;
                 } else {
                     nodeQuestions.classList.add('hidden');
-                    nodeFinal.classList.remove('hidden');
-                    setTimeout(() => nodeFinal.style.opacity = 1, 50);
+                    nodeCanvasUI.classList.remove('hidden');
                     isFinalScreen = true;
                     canvas.style.pointerEvents = 'auto'; 
                     initMindCosmoPhysics();
-                    drawMindCosmo();
+                    requestAnimationFrame(animateCanvas); // Start the breathing animation
                 }
             }, 500);
         });
 
-        // LIVE EDITING THE CORE STAR
-        liveCoreInput.addEventListener('input', (e) => {
-            finalStarText = e.target.value;
-            drawMindCosmo(); 
-        });
-
-        function saveMindCosmo() {
+        function saveAndContinue() {
+            // Trigger Download
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = canvas.width;
             tempCanvas.height = canvas.height;
@@ -284,25 +304,36 @@
             link.download = 'My-MindCosmo.png';
             link.href = tempCanvas.toDataURL('image/png');
             link.click();
+
+            // Transition to Exit Node
+            isFinalScreen = false; // Stop animation loop
+            nodeCanvasUI.classList.add('hidden');
+            canvas.style.opacity = 0.2; // Dim background for exit screen
+            canvas.style.pointerEvents = 'none';
+            
+            setTimeout(() => {
+                nodeExit.classList.remove('hidden');
+                setTimeout(() => nodeExit.style.opacity = 1, 50);
+            }, 500);
         }
 
-        // --- INTERACTIVE CANVAS ENGINE ---
+        // --- INTERACTIVE CANVAS ENGINE & ANIMATION ---
         let coreNode = { x: 0, y: 0 };
         let starNodes = [];
+        let time = 0; // For breathing animation
         
-        // Dragging State
         let isDragging = false;
         let draggedNode = null; 
-        let dragOffsetX = 0;
-        let dragOffsetY = 0;
+        let dragOffsetX = 0, dragOffsetY = 0;
+        let dragStartX = 0, dragStartY = 0;
 
         function initMindCosmoPhysics() {
             coreNode.x = canvas.width / 2;
-            coreNode.y = canvas.height / 2 - 120;
+            coreNode.y = canvas.height / 2;
             
             starNodes = [];
             if (collectedStars.length > 0) {
-                const radius = 140; 
+                const radius = 160; 
                 collectedStars.forEach((starText, index) => {
                     const angle = (Math.PI * 2 / collectedStars.length) * index - (Math.PI / 2); 
                     starNodes.push({
@@ -326,8 +357,10 @@
         }
 
         function handleDragStart(e) {
-            if (!isFinalScreen) return;
+            if (!isFinalScreen || !editInput.classList.contains('hidden')) return;
             const pos = getPos(e);
+            dragStartX = pos.x;
+            dragStartY = pos.y;
 
             if (Math.hypot(pos.x - coreNode.x, pos.y - coreNode.y) < 50) {
                 isDragging = true;
@@ -338,7 +371,7 @@
             }
 
             for (let i = 0; i < starNodes.length; i++) {
-                if (Math.hypot(pos.x - starNodes[i].x, pos.y - starNodes[i].y) < 30) {
+                if (Math.hypot(pos.x - starNodes[i].x, pos.y - starNodes[i].y) < 40) {
                     isDragging = true;
                     draggedNode = i;
                     dragOffsetX = pos.x - starNodes[i].x;
@@ -360,13 +393,48 @@
                 starNodes[draggedNode].x = pos.x - dragOffsetX;
                 starNodes[draggedNode].y = pos.y - dragOffsetY;
             }
-            drawMindCosmo();
         }
 
-        function handleDragEnd() {
+        function handleDragEnd(e) {
+            if(!isDragging && !isFinalScreen) return;
+            
+            // Distinguish between a drag and a click
+            const pos = getPos(e.changedTouches ? e.changedTouches[0] : e);
+            const dist = Math.hypot(pos.x - dragStartX, pos.y - dragStartY);
+            
+            if (dist < 5 && draggedNode !== 'core' && draggedNode !== null) {
+                // It was a click on a star!
+                openStarEditor(draggedNode);
+            }
+
             isDragging = false;
             draggedNode = null;
         }
+
+        // Click-to-Edit Logic
+        let editingIndex = -1;
+        function openStarEditor(index) {
+            editingIndex = index;
+            const star = starNodes[index];
+            editInput.value = star.text;
+            editInput.style.left = star.x + 'px';
+            editInput.style.top = (star.y - 25) + 'px';
+            editInput.classList.remove('hidden');
+            editInput.focus();
+        }
+
+        function closeStarEditor() {
+            if(editingIndex > -1) {
+                if(editInput.value.trim() !== "") {
+                    starNodes[editingIndex].text = editInput.value.trim();
+                }
+            }
+            editInput.classList.add('hidden');
+            editingIndex = -1;
+        }
+
+        editInput.addEventListener('blur', closeStarEditor);
+        editInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') closeStarEditor(); });
 
         canvas.addEventListener('mousedown', handleDragStart);
         canvas.addEventListener('mousemove', handleDragMove);
@@ -387,36 +455,60 @@
                 coreNode.x += dx;
                 coreNode.y += dy;
                 starNodes.forEach(s => { s.x += dx; s.y += dy; });
-                drawMindCosmo(); 
+            } else if(!document.getElementById('node-exit').classList.contains('hidden')) {
+                // Do nothing, let it stay dim
             } else { 
                 drawBackgroundStars(); 
             }
         }
 
+        // Background generation (drawn once unless theme changes)
+        let bgStars = [];
+        function generateBgStars() {
+            bgStars = [];
+            for(let i = 0; i < 150; i++) {
+                bgStars.push({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    r: Math.random() * 1.5,
+                    alpha: Math.random() * 0.8 + 0.2
+                });
+            }
+        }
+
         function drawBackgroundStars() {
+            if(bgStars.length === 0) generateBgStars();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const currentStarColor = getComputedStyle(document.documentElement).getPropertyValue('--star-color').trim();
-            for(let i = 0; i < 150; i++) {
+            
+            bgStars.forEach(s => {
                 ctx.beginPath();
-                ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 1.5, 0, Math.PI * 2);
-                ctx.globalAlpha = Math.random() * 0.8 + 0.2;
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.globalAlpha = s.alpha;
                 ctx.fillStyle = currentStarColor;
                 ctx.fill();
-            }
+            });
             ctx.globalAlpha = 1.0;
         }
 
-        function drawMindCosmo() {
+        // The main render loop for the breathing effect
+        function animateCanvas() {
+            if(!isFinalScreen) return; // Stop rendering when exiting
+            time += 0.03; // Controls breathing speed
+            
             drawBackgroundStars();
             
             const currentAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
             const currentStarColor = getComputedStyle(document.documentElement).getPropertyValue('--star-color').trim();
 
+            const breatheScale = 1 + Math.sin(time) * 0.05; // 5% fluctuation
+
+            // Draw connection lines
             starNodes.forEach(star => {
                 ctx.beginPath();
-                ctx.setLineDash([5, 10]);
+                ctx.setLineDash([2, 8]);
                 ctx.strokeStyle = currentStarColor;
-                ctx.globalAlpha = 0.4;
+                ctx.globalAlpha = 0.2;
                 ctx.moveTo(coreNode.x, coreNode.y);
                 ctx.lineTo(star.x, star.y);
                 ctx.stroke();
@@ -424,68 +516,80 @@
             ctx.setLineDash([]);
             ctx.globalAlpha = 1.0;
 
-            const gradient = ctx.createRadialGradient(coreNode.x, coreNode.y, 5, coreNode.x, coreNode.y, 180);
-            gradient.addColorStop(0, '#ffffff'); 
-            gradient.addColorStop(0.2, currentAccentColor); 
+            // Draw Core Aura (Breathing)
+            const gradient = ctx.createRadialGradient(coreNode.x, coreNode.y, 5, coreNode.x, coreNode.y, 220 * breatheScale);
+            gradient.addColorStop(0, 'rgba(255,255,255,0.8)'); 
+            gradient.addColorStop(0.15, currentAccentColor); 
             gradient.addColorStop(1, 'transparent'); 
             
             ctx.fillStyle = gradient;
-            ctx.globalAlpha = 0.6;
+            ctx.globalAlpha = 0.7;
             ctx.beginPath();
-            ctx.arc(coreNode.x, coreNode.y, 180, 0, Math.PI * 2);
+            ctx.arc(coreNode.x, coreNode.y, 220 * breatheScale, 0, Math.PI * 2);
             ctx.fill();
             ctx.globalAlpha = 1.0;
             
+            // Draw Core Solid Center
             ctx.fillStyle = '#ffffff';
-            ctx.shadowBlur = 30;
+            ctx.shadowBlur = 40;
             ctx.shadowColor = currentAccentColor;
             ctx.beginPath();
-            ctx.arc(coreNode.x, coreNode.y, 12, 0, Math.PI * 2);
+            ctx.arc(coreNode.x, coreNode.y, 10, 0, Math.PI * 2);
             ctx.fill();
             ctx.shadowBlur = 0;
 
+            // Draw Orbit Rings
             for (let i = 1; i <= 3; i++) {
                 ctx.beginPath();
-                ctx.setLineDash([5, 15]);
                 ctx.strokeStyle = currentStarColor;
-                ctx.globalAlpha = 0.3 / i; 
-                ctx.arc(coreNode.x, coreNode.y, 65 * i, 0, Math.PI*2);
+                ctx.globalAlpha = 0.1 / i; 
+                ctx.arc(coreNode.x, coreNode.y, 75 * i, 0, Math.PI*2);
                 ctx.stroke();
             }
-            ctx.setLineDash([]);
             ctx.globalAlpha = 1.0;
 
-            if (finalStarText) {
-                ctx.fillStyle = '#ffffff';
-                ctx.font = "1.2rem 'Segoe UI'";
-                ctx.textAlign = "center";
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#000000'; 
-                ctx.fillText(finalStarText, coreNode.x, coreNode.y + 40);
-                
-                ctx.fillStyle = 'rgba(255,255,255,0.7)';
-                ctx.font = "0.8rem 'Segoe UI'";
-                ctx.fillText("Your MindCosmo Core", coreNode.x, coreNode.y + 65);
-                ctx.shadowBlur = 0; 
-            }
+            // Core Text (The assigned Emotion)
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "1.1rem 'Segoe UI'";
+            ctx.textAlign = "center";
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#000000'; 
+            ctx.fillText(coreText, coreNode.x, coreNode.y + 35);
+            ctx.shadowBlur = 0; 
 
-            starNodes.forEach(star => {
+            // Draw Stars (with breathing auras)
+            starNodes.forEach((star, index) => {
+                // Star glow
                 ctx.beginPath();
-                ctx.arc(star.x, star.y, 6, 0, Math.PI * 2);
-                ctx.fillStyle = '#ffffff';
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = currentAccentColor;
+                ctx.arc(star.x, star.y, 15 * breatheScale, 0, Math.PI * 2);
+                const starGrad = ctx.createRadialGradient(star.x, star.y, 1, star.x, star.y, 15 * breatheScale);
+                starGrad.addColorStop(0, currentAccentColor);
+                starGrad.addColorStop(1, 'transparent');
+                ctx.fillStyle = starGrad;
                 ctx.fill();
-                ctx.shadowBlur = 0; 
-                
+
+                // Star Solid Center
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, 4, 0, Math.PI * 2);
                 ctx.fillStyle = '#ffffff';
-                ctx.font = "0.85rem 'Segoe UI'";
-                ctx.textAlign = "center";
-                ctx.shadowBlur = 5;
-                ctx.shadowColor = '#000000';
-                ctx.fillText(star.text, star.x, star.y + 20);
-                ctx.shadowBlur = 0;
+                ctx.fill();
+                
+                // Hide text for the specific star currently being edited
+                if(index !== editingIndex) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = "0.9rem 'Segoe UI'";
+                    ctx.textAlign = "center";
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = '#000000';
+                    
+                    // Add subtle floating effect to text
+                    const floatY = Math.sin(time + index) * 3;
+                    ctx.fillText(star.text, star.x, star.y + 25 + floatY);
+                    ctx.shadowBlur = 0;
+                }
             });
+
+            requestAnimationFrame(animateCanvas);
         }
 
         window.addEventListener('resize', resizeCanvas);
