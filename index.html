@@ -26,7 +26,7 @@
             align-items: center;
             text-align: center;
             transition: background-color 1s ease;
-            touch-action: none; /* Prevents mobile scrolling while dragging canvas */
+            touch-action: none;
         }
 
         /* Branding & Themes */
@@ -98,7 +98,6 @@
         <button class="theme-btn" onclick="setTheme('desert', this)">Desert Night</button>
     </div>
 
-    <!-- The Canvas is now interactive -->
     <canvas id="cosmos-canvas"></canvas>
 
     <!-- Node 1: Welcome & Emotion -->
@@ -112,13 +111,13 @@
         </div>
     </div>
 
-    <!-- Node 2: Dynamic Socratic Engine with Optional Star -->
+    <!-- Node 2: Dynamic Socratic Engine with Mandatory Star -->
     <div id="node-questions" class="node-container hidden">
         <h1 class="prompt-text" id="socratic-prompt">Loading...</h1>
         
         <textarea id="user-thought" placeholder="Let it out into the void..."></textarea>
         
-        <div class="star-label">✨ Extract a positive truth (Optional):</div>
+        <div class="star-label">✨ Add a star:</div>
         <input type="text" id="question-star" placeholder="A single step, a calming truth, or a boundary..." maxlength="60">
         
         <br>
@@ -225,16 +224,24 @@
             isFinalScreen = false;
             liveCoreInput.value = ""; 
             promptElement.innerText = currentPath[currentStep];
-            canvas.style.pointerEvents = 'none'; // Disable canvas dragging initially
+            canvas.style.pointerEvents = 'none'; 
             transition(nodeWelcome, nodeQuestions);
         }
 
         document.getElementById('next-btn').addEventListener('click', () => {
-            if (inputElement.value.trim() === "") return;
-            
-            if (questionStarInput.value.trim() !== "") {
-                collectedStars.push(questionStarInput.value.trim());
+            // Mandatory check for the void text
+            if (inputElement.value.trim() === "") {
+                inputElement.focus();
+                return; 
             }
+            // Mandatory check for the star
+            if (questionStarInput.value.trim() === "") {
+                questionStarInput.focus();
+                return;
+            }
+            
+            // Save the newly mandatory star
+            collectedStars.push(questionStarInput.value.trim());
 
             currentStep++;
             nodeQuestions.style.opacity = 0;
@@ -250,7 +257,7 @@
                     nodeFinal.classList.remove('hidden');
                     setTimeout(() => nodeFinal.style.opacity = 1, 50);
                     isFinalScreen = true;
-                    canvas.style.pointerEvents = 'auto'; // Enable dragging!
+                    canvas.style.pointerEvents = 'auto'; 
                     initMindCosmoPhysics();
                     drawMindCosmo();
                 }
@@ -285,7 +292,7 @@
         
         // Dragging State
         let isDragging = false;
-        let draggedNode = null; // 'core' or index of star
+        let draggedNode = null; 
         let dragOffsetX = 0;
         let dragOffsetY = 0;
 
@@ -307,7 +314,6 @@
             }
         }
 
-        // Mouse & Touch Events
         function getPos(evt) {
             const rect = canvas.getBoundingClientRect();
             let clientX = evt.clientX;
@@ -323,7 +329,6 @@
             if (!isFinalScreen) return;
             const pos = getPos(e);
 
-            // Check if Core was clicked
             if (Math.hypot(pos.x - coreNode.x, pos.y - coreNode.y) < 50) {
                 isDragging = true;
                 draggedNode = 'core';
@@ -332,7 +337,6 @@
                 return;
             }
 
-            // Check if any Star was clicked
             for (let i = 0; i < starNodes.length; i++) {
                 if (Math.hypot(pos.x - starNodes[i].x, pos.y - starNodes[i].y) < 30) {
                     isDragging = true;
@@ -346,7 +350,7 @@
 
         function handleDragMove(e) {
             if (!isDragging) return;
-            e.preventDefault(); // Stop mobile scrolling while dragging
+            e.preventDefault(); 
             const pos = getPos(e);
 
             if (draggedNode === 'core') {
@@ -366,7 +370,7 @@
 
         canvas.addEventListener('mousedown', handleDragStart);
         canvas.addEventListener('mousemove', handleDragMove);
-        window.addEventListener('mouseup', handleDragEnd); // Catch outside drops
+        window.addEventListener('mouseup', handleDragEnd); 
         canvas.addEventListener('touchstart', handleDragStart, {passive: false});
         canvas.addEventListener('touchmove', handleDragMove, {passive: false});
         window.addEventListener('touchend', handleDragEnd);
@@ -377,7 +381,6 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             
-            // Keep nodes relative to screen resize
             if(isFinalScreen) { 
                 const dx = (canvas.width - oldW) / 2;
                 const dy = (canvas.height - oldH) / 2;
@@ -409,7 +412,6 @@
             const currentAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
             const currentStarColor = getComputedStyle(document.documentElement).getPropertyValue('--star-color').trim();
 
-            // 1. Draw connection lines between Core and Stars (Mind Map effect)
             starNodes.forEach(star => {
                 ctx.beginPath();
                 ctx.setLineDash([5, 10]);
@@ -422,7 +424,6 @@
             ctx.setLineDash([]);
             ctx.globalAlpha = 1.0;
 
-            // 2. Draw the Positive Glowing Core
             const gradient = ctx.createRadialGradient(coreNode.x, coreNode.y, 5, coreNode.x, coreNode.y, 180);
             gradient.addColorStop(0, '#ffffff'); 
             gradient.addColorStop(0.2, currentAccentColor); 
@@ -443,7 +444,6 @@
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // 3. Draw Orbit Rings tracking the Core
             for (let i = 1; i <= 3; i++) {
                 ctx.beginPath();
                 ctx.setLineDash([5, 15]);
@@ -455,7 +455,6 @@
             ctx.setLineDash([]);
             ctx.globalAlpha = 1.0;
 
-            // 4. Draw the Final Takeaway Core Text
             if (finalStarText) {
                 ctx.fillStyle = '#ffffff';
                 ctx.font = "1.2rem 'Segoe UI'";
@@ -470,7 +469,6 @@
                 ctx.shadowBlur = 0; 
             }
 
-            // 5. Draw the Interactive Question Stars
             starNodes.forEach(star => {
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, 6, 0, Math.PI * 2);
