@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindCosmos 🌌 by InMind</title>
+    <style>
+        :root {
+            --bg-color: #050510;
+            --star-color: #e0f2fe;
+            --accent-color: #0ea5e9;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--star-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: background-color 1s ease;
+        }
+
+        /* Branding */
+        .brand-container {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            text-align: left;
+            z-index: 20;
+        }
+
+        .brand-title {
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin: 0;
+            color: var(--star-color);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .brand-subtitle {
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            opacity: 0.6;
+            margin-top: 2px;
+            color: var(--star-color);
+        }
+
+        /* Theme Selector */
+        .theme-selector {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+        }
+
+        .theme-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--star-color);
+            font-size: 0.75rem;
+            padding: 5px 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.3s;
+        }
+
+        .theme-btn:hover, .theme-btn.active {
+            opacity: 1;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 8px var(--accent-color);
+        }
+
+        /* Core Engine */
+        #app-container {
+            width: 90%;
+            max-width: 600px;
+            z-index: 10;
+            transition: opacity 1s ease-in-out;
+        }
+
+        h1.prompt-text {
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+            box-sizing: border-box;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            transition: border 0.3s ease;
+        }
+
+        textarea:focus {
+            border: 1px solid var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color);
+        }
+
+        button.action-btn {
+            margin-top: 2rem;
+            background: transparent;
+            color: var(--star-color);
+            border: 1px solid var(--accent-color);
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        button.action-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 20px var(--accent-color);
+        }
+
+        #cosmos-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .hidden {
+            display: none !important;
+            opacity: 0;
+        }
+
+        /* Final Screen Links */
+        .action-links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .action-links a {
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .action-links a:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Branding -->
+    <div class="brand-container">
+        <h2 class="brand-title">MindCosmos</h2>
+        <div class="brand-subtitle">by InMind</div>
+    </div>
+
+    <!-- Theme Selector -->
+    <div class="theme-selector">
+        <button class="theme-btn active" onclick="setTheme('cosmos', this)">Deep Cosmos</button>
+        <button class="theme-btn" onclick="setTheme('ocean', this)">Midnight Ocean</button>
+        <button class="theme-btn" onclick="setTheme('aurora', this)">Aurora Sky</button>
+        <button class="theme-btn" onclick="setTheme('desert', this)">Desert Night</button>
+    </div>
+
+    <!-- Background Canvas for Stars -->
+    <canvas id="cosmos-canvas"></canvas>
+
+    <!-- Interactive Socratic Engine -->
+    <div id="app-container">
+        <div id="question-node">
+            <h1 class="prompt-text" id="socratic-prompt">What is the heaviest thought on your mind right now?</h1>
+            <textarea id="user-thought" placeholder="Let it out..."></textarea>
+            <br>
+            <button class="action-btn" id="next-btn">Release</button>
+        </div>
+
+        <!-- Final Constellation Screen -->
+        <div id="final-node" class="hidden">
+            <h1 class="prompt-text">Your mind is a vast space. This thought was just one star.</h1>
+            <p style="opacity: 0.7; font-size: 0.9rem;">The tension has been released into the ether.</p>
+            
+            <div class="action-links">
+                <a href="#" target="_blank" id="coffee-link">☕ Support this sanctuary (Buy Me a Coffee)</a>
+                <a href="#" target="_blank" id="therapy-link">🌌 Talk to a professional (BetterHelp)</a>
+                <a href="/blog" id="blog-link">📖 Read our stories</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. THEME ENGINE ---
+        const themes = {
+            cosmos: { bg: '#050510', star: '#e0f2fe', accent: '#0ea5e9' }, // Deep Blue/Silver
+            ocean: { bg: '#010b19', star: '#a5f3fc', accent: '#06b6d4' },  // Deep Teal/Cyan
+            aurora: { bg: '#02120a', star: '#dcfce7', accent: '#22c55e' }, // Dark Forest/Glowing Green
+            desert: { bg: '#170b0b', star: '#fef08a', accent: '#eab308' }  // Dark Burgundy/Warm Gold
+        };
+
+        function setTheme(themeName, btnElement) {
+            const root = document.documentElement;
+            root.style.setProperty('--bg-color', themes[themeName].bg);
+            root.style.setProperty('--star-color', themes[themeName].star);
+            root.style.setProperty('--accent-color', themes[themeName].accent);
+            
+            // Update active button styling
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            // Redraw stars to match new colors
+            drawStars();
+        }
+
+        // --- 2. SOCRATIC ENGINE ---
+        const questions = [
+            "What is the heaviest thought on your mind right now?",
+            "Is this thought an absolute, proven fact, or is it a fear?",
+            "If someone you deeply cared about had this exact thought, what would you tell them?",
+            "What is one tiny, physical thing you can control in this exact moment?"
+        ];
+        
+        let currentStep = 0;
+
+        const promptElement = document.getElementById('socratic-prompt');
+        const inputElement = document.getElementById('user-thought');
+        const nextButton = document.getElementById('next-btn');
+        const questionNode = document.getElementById('question-node');
+        const finalNode = document.getElementById('final-node');
+
+        nextButton.addEventListener('click', () => {
+            if (inputElement.value.trim() === "") return;
+
+            currentStep++;
+            questionNode.style.opacity = 0;
+            
+            setTimeout(() => {
+                if (currentStep < questions.length) {
+                    promptElement.innerText = questions[currentStep];
+                    inputElement.value = "";
+                    questionNode.style.opacity = 1;
+                    
+                    if (currentStep === questions.length - 1) {
+                        nextButton.innerText = "Form Constellation";
+                    }
+                } else {
+                    questionNode.classList.add('hidden');
+                    finalNode.classList.remove('hidden');
+                    setTimeout(() => finalNode.style.opacity = 1, 100);
+                    generateConstellation();
+                }
+            }, 500);
+        });
+
+        // --- 3. CANVAS ENGINE ---
+        const canvas = document.getElementById('cosmos-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drawStars();
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Get current theme star color to draw stars
+            const currentStarColor = getComputedStyle(document.documentElement).getPropertyValue('--star-color').trim();
+            
+            for(let i = 0; i < 150; i++) {
+                ctx.beginPath();
+                let x = Math.random() * canvas.width;
+                let y = Math.random() * canvas.height;
+                let radius = Math.random() * 1.5;
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                
+                // Convert hex to rgb for opacity (simplified approach)
+                ctx.globalAlpha = Math.random() * 0.8 + 0.2;
+                ctx.fillStyle = currentStarColor;
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1.0; // reset
+        }
+
+        function generateConstellation() {
+            const currentAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+            
+            ctx.strokeStyle = currentAccentColor;
+            ctx.globalAlpha = 0.3;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            
+            let startX = canvas.width / 2;
+            let startY = canvas.height / 2;
+            ctx.moveTo(startX, startY);
+            
+            for(let i = 0; i < 6; i++) {
+                let nextX = startX + (Math.random() - 0.5) * 300;
+                let nextY = startY + (Math.random() - 0.5) * 300;
+                ctx.lineTo(nextX, nextY);
+                
+                // Draw node
+                ctx.globalAlpha = 1.0;
+                ctx.fillStyle = currentAccentColor;
+                ctx.arc(nextX, nextY, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.moveTo(nextX, nextY);
+                
+                ctx.globalAlpha = 0.3;
+                
+                startX = nextX;
+                startY = nextY;
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 1.0;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+    </script>
+</body>
+</html>
