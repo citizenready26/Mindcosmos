@@ -65,15 +65,15 @@
         .star-label { text-align: left; font-size: 0.9rem; opacity: 0.9; margin: 10px 0 8px 5px; color: var(--star-color); pointer-events: none; }
 
         button.action-btn { margin-top: 2rem; background: transparent; color: var(--star-color); border: 1px solid var(--accent-color); padding: 12px 30px; border-radius: 30px; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); }
-        button.action-btn:hover { background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 20px var(--accent-color); }
+        button.action-btn:hover { background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 20px var(--accent-color); transform: scale(1.02); }
 
-   /* Reflection Journal UI - Premium Glassmorphism */
+        /* TRUE PREMIUM REFLECTION JOURNAL */
         #node-reflection-journal {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(5, 5, 16, 0.6); /* Semi-transparent void */
-            backdrop-filter: blur(15px); /* Frosted glass effect over the stars */
-            -webkit-backdrop-filter: blur(15px);
+            background: linear-gradient(135deg, rgba(5, 5, 16, 0.8), rgba(2, 8, 15, 0.7));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             color: white;
             overflow-y: auto;
             z-index: 100;
@@ -83,7 +83,7 @@
             transition: opacity 1s ease-in-out;
         }
         .journal-content {
-            max-width: 650px;
+            max-width: 700px;
             margin: 0 auto;
         }
         .journal-title {
@@ -96,40 +96,40 @@
             background: linear-gradient(90deg, #ffffff, var(--accent-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
+            text-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
         }
         .entry-container {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
+            border-left: 4px solid var(--accent-color);
+            border-radius: 12px;
             padding: 30px;
             margin-bottom: 25px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            opacity: 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            opacity: 0; 
             transform: translateY(30px);
             animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             transition: all 0.3s ease;
         }
         .entry-container:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 15px 35px rgba(14, 165, 233, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 40px rgba(14, 165, 233, 0.15);
+            transform: translateY(-3px);
         }
         .journal-q {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--accent-color);
             text-transform: uppercase;
             letter-spacing: 2px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             opacity: 0.9;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 12px;
         }
         .journal-a {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             font-weight: 300;
             color: #ffffff;
-            line-height: 1.7;
+            line-height: 1.6;
             text-shadow: 0 0 10px rgba(255,255,255,0.1);
         }
         @keyframes fadeUp {
@@ -211,7 +211,7 @@
                 height: 80px; 
             }
             .emotion-grid {
-                grid-template-columns: 1fr; /* Stacks emotion buttons on very small phones */
+                grid-template-columns: 1fr; 
             }
         } 
     </style>
@@ -370,14 +370,14 @@
         let currentPath = [];
         let currentStep = 0;
         let collectedStars = [];
-        let userAnswers = []; // New tracker for the journal
+        let userAnswers = [];
         let coreText = "";
         let isFinalScreen = false;
 
         // UI Elements
         const nodeWelcome = document.getElementById('node-welcome');
         const nodeQuestions = document.getElementById('node-questions');
-        const nodeReflection = document.getElementById('node-reflection-journal'); // New Node
+        const nodeReflection = document.getElementById('node-reflection-journal'); 
         const nodeCanvasUI = document.getElementById('node-canvas-ui');
         const nodeExit = document.getElementById('node-exit');
         
@@ -403,7 +403,7 @@
             coreText = coreLabels[emotion];
             currentStep = 0;
             collectedStars = [];
-            userAnswers = []; // Reset answers
+            userAnswers = []; 
             isFinalScreen = false;
             
             promptElement.innerText = currentPath[currentStep];
@@ -415,7 +415,6 @@
             if (inputElement.value.trim() === "") { inputElement.focus(); return; }
             if (questionStarInput.value.trim() === "") { questionStarInput.focus(); return; }
             
-            // Save the data
             collectedStars.push(questionStarInput.value.trim());
             userAnswers.push(inputElement.value.trim());
 
@@ -429,53 +428,49 @@
                     questionStarInput.value = "";
                     nodeQuestions.style.opacity = 1;
                 } else {
-                    // Transition to the Reflection Journal
                     buildReflectionJournal();
                 }
             }, 500);
         });
 
-        // NEW: Builds the journal page dynamically
+        // FULLY FIXED JOURNAL GENERATOR
         function buildReflectionJournal() {
             nodeQuestions.classList.add('hidden');
             
             const entriesDiv = document.getElementById('journal-entries');
-            entriesDiv.innerHTML = ""; 
+            let builtHTML = ""; 
 
-            // Loop through the answered questions
+            // Building the HTML string once prevents the animation from resetting repeatedly
             for (let i = 0; i < currentPath.length; i++) {
-                let delay = i * 0.3; 
-                let entryHTML = `
+                let delay = i * 0.15; // Clean, sweeping cascade
+                builtHTML += `
                     <div class="entry-container" style="animation-delay: ${delay}s">
                         <div class="journal-q">${currentPath[i]}</div>
                         <div class="journal-a">${userAnswers[i] || "..."}</div>
                     </div>
                 `;
-                entriesDiv.innerHTML += entryHTML;
             }
-
-            // Hide the canvas temporarily so the background is a pure void for reading
             
+            entriesDiv.innerHTML = builtHTML;
+
+            // Keeps canvas visible, transitions the frosted glass layer in
             nodeReflection.classList.remove('hidden');
             setTimeout(() => nodeReflection.style.opacity = 1, 50);
         }
 
-        // NEW: Transitions from Journal to the Final Canvas
         function goToMindCosmos() {
             nodeReflection.style.opacity = 0;
             setTimeout(() => {
                 nodeReflection.classList.add('hidden');
                 nodeCanvasUI.classList.remove('hidden');
                 
-                // Bring the stars back
                 isFinalScreen = true;
                 canvas.style.pointerEvents = 'auto'; 
                 initMindCosmoPhysics();
-            }, 600);
+            }, 800);
         }
 
         function saveAndContinue() {
-            // Trigger Download
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = canvas.width;
             tempCanvas.height = canvas.height;
@@ -490,7 +485,6 @@
             link.href = tempCanvas.toDataURL('image/png');
             link.click();
 
-            // Transition to Exit Node
             isFinalScreen = false; 
             nodeCanvasUI.classList.add('hidden');
             canvas.style.opacity = 0.2; 
@@ -610,7 +604,6 @@
             draggedNode = null;
         }
 
-        // Click-to-Edit Logic
         let editingIndex = -1;
         function openStarEditor(index) {
             editingIndex = index;
@@ -657,7 +650,6 @@
             }
         }
 
-        // The Universal Animation Loop
         function animateCanvas() {
             time += 0.03; 
             
@@ -665,7 +657,6 @@
             const currentStarColor = getComputedStyle(document.documentElement).getPropertyValue('--star-color').trim();
             const currentAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
 
-            // 1. Live Background Stars
             bgStars.forEach(s => {
                 s.x += s.vx;
                 s.y += s.vy;
@@ -687,7 +678,6 @@
             });
             ctx.globalAlpha = 1.0;
 
-            // 2. The Final MindCosmo
             if (isFinalScreen) {
                 const breatheScale = 1 + Math.sin(time) * 0.05;
 
