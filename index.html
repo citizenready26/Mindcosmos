@@ -67,49 +67,70 @@
         button.action-btn { margin-top: 2rem; background: transparent; color: var(--star-color); border: 1px solid var(--accent-color); padding: 12px 30px; border-radius: 30px; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); }
         button.action-btn:hover { background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 20px var(--accent-color); }
 
-        /* Reflection Journal UI */
+   /* Reflection Journal UI - Premium Glassmorphism */
         #node-reflection-journal {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-color); 
+            background-color: rgba(5, 5, 16, 0.6); /* Semi-transparent void */
+            backdrop-filter: blur(15px); /* Frosted glass effect over the stars */
+            -webkit-backdrop-filter: blur(15px);
             color: white;
             overflow-y: auto;
             z-index: 100;
-            padding: 80px 20px 40px 20px;
+            padding: 80px 20px 80px 20px;
             box-sizing: border-box;
             text-align: left;
-            transition: opacity 0.8s ease-in-out;
+            transition: opacity 1s ease-in-out;
         }
         .journal-content {
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto;
         }
         .journal-title {
             text-align: center;
             font-weight: 300;
-            letter-spacing: 2px;
-            margin-bottom: 40px;
-            color: var(--star-color);
+            font-size: 2.5rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 50px;
+            background: linear-gradient(90deg, #ffffff, var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
         }
         .entry-container {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             opacity: 0;
-            transform: translateY(20px);
-            animation: fadeUp 0.8s ease forwards;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transition: all 0.3s ease;
+        }
+        .entry-container:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 15px 35px rgba(14, 165, 233, 0.1);
         }
         .journal-q {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--accent-color);
-            font-style: italic;
-            margin-bottom: 8px;
-            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 12px;
         }
         .journal-a {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
+            font-weight: 300;
             color: #ffffff;
-            line-height: 1.5;
+            line-height: 1.7;
+            text-shadow: 0 0 10px rgba(255,255,255,0.1);
         }
         @keyframes fadeUp {
             to { opacity: 1; transform: translateY(0); }
@@ -434,7 +455,7 @@
             }
 
             // Hide the canvas temporarily so the background is a pure void for reading
-            canvas.style.opacity = 0;
+            
             nodeReflection.classList.remove('hidden');
             setTimeout(() => nodeReflection.style.opacity = 1, 50);
         }
@@ -446,7 +467,7 @@
                 nodeReflection.classList.add('hidden');
                 nodeCanvasUI.classList.remove('hidden');
                 
-                canvas.style.opacity = 1; // Bring the stars back
+                // Bring the stars back
                 isFinalScreen = true;
                 canvas.style.pointerEvents = 'auto'; 
                 initMindCosmoPhysics();
