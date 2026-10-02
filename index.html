@@ -152,25 +152,26 @@
 
     .composer-footer {
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
       gap: 12px;
       padding-top: 14px;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .emotion-picker {
+    .composer-footer-row {
       display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 2px;
-      max-width: 100%;
-      scrollbar-width: none; /* Hide in Firefox */
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
 
-    .emotion-picker::-webkit-scrollbar {
-      display: none; /* Hide in Chrome/Safari */
+    /* Wrap emotions in the composer so they don't get cut off */
+    .emotion-picker {
+      display: flex;
+      flex-wrap: wrap; 
+      gap: 6px;
+      width: 100%;
     }
 
     .emotion-radio {
@@ -201,10 +202,11 @@
       border: none;
       font-weight: 600;
       font-size: 0.82rem;
-      padding: 8px 18px;
+      padding: 8px 24px;
       border-radius: 999px;
       cursor: pointer;
       transition: opacity 0.2s;
+      align-self: flex-end;
     }
 
     .btn-post:hover {
@@ -216,14 +218,40 @@
       cursor: not-allowed;
     }
 
-    /* Emotion Filter Bar */
+    /* Emotion Filter Bar with Arrows */
+    .filter-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .scroll-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+    }
+
+    .scroll-btn:hover {
+      color: var(--text);
+    }
+
     .filter-bar {
       display: flex;
       gap: 8px;
       overflow-x: auto;
-      padding-bottom: 12px;
-      margin-bottom: 16px;
       scrollbar-width: none;
+      scroll-behavior: smooth;
+      flex: 1;
+      padding-bottom: 2px;
     }
 
     .filter-bar::-webkit-scrollbar {
@@ -567,17 +595,21 @@
       </div>
     </div>
 
-    <!-- Emotion Filter Bar -->
-    <div class="filter-bar">
-      <button class="filter-btn active" onclick="setFilter('All', this)">All Feeds</button>
-      <button class="filter-btn special-filter" onclick="setFilter('MyMind', this)">My Mind</button>
-      <button class="filter-btn" onclick="setFilter('Anxious', this)">Anxious</button>
-      <button class="filter-btn" onclick="setFilter('Overwhelmed', this)">Overwhelmed</button>
-      <button class="filter-btn" onclick="setFilter('Lost', this)">Lost</button>
-      <button class="filter-btn" onclick="setFilter('Angry', this)">Angry</button>
-      <button class="filter-btn" onclick="setFilter('Numb', this)">Numb</button>
-      <button class="filter-btn" onclick="setFilter('Hopeful', this)">Hopeful</button>
-      <button class="filter-btn" onclick="setFilter('Can\'t Explain', this)">I can't explain</button>
+    <!-- Emotion Filter Bar with Arrows -->
+    <div class="filter-wrapper">
+      <button class="scroll-btn" onclick="scrollFilters(-150)" title="Scroll Left">&#10094;</button>
+      <div class="filter-bar" id="filterBar">
+        <button class="filter-btn active" onclick="setFilter('All', this)">All Feeds</button>
+        <button class="filter-btn special-filter" onclick="setFilter('MyMind', this)">My Mind</button>
+        <button class="filter-btn" onclick="setFilter('Anxious', this)">Anxious</button>
+        <button class="filter-btn" onclick="setFilter('Overwhelmed', this)">Overwhelmed</button>
+        <button class="filter-btn" onclick="setFilter('Lost', this)">Lost</button>
+        <button class="filter-btn" onclick="setFilter('Angry', this)">Angry</button>
+        <button class="filter-btn" onclick="setFilter('Numb', this)">Numb</button>
+        <button class="filter-btn" onclick="setFilter('Hopeful', this)">Hopeful</button>
+        <button class="filter-btn" onclick="setFilter('Can\'t Explain', this)">I can't explain</button>
+      </div>
+      <button class="scroll-btn" onclick="scrollFilters(150)" title="Scroll Right">&#10095;</button>
     </div>
 
     <!-- Feed Container -->
@@ -622,6 +654,11 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // Horizontal Scroll Function
+    function scrollFilters(amount) {
+      document.getElementById('filterBar').scrollBy({ left: amount, behavior: 'smooth' });
+    }
+
     // 2. Invisible Auth & Sync Key Generation
     const WORD_LIST = ["silent", "orbit", "cloud", "shadow", "spark", "echo", "harbor", "drift", "pulse", "depth", "light", "river"];
 
@@ -653,7 +690,6 @@
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
       element.classList.add('active');
       
-      // Re-render feed with new filter
       if (lastSnapshot) renderFeed(lastSnapshot);
     }
 
@@ -669,13 +705,12 @@
       return `${days}d ago`;
     }
 
-    // 4. Real-time Feed Listener (Client-side filtering to bypass Firestore Index errors)
+    // 4. Real-time Feed Listener
     let lastSnapshot = null;
 
     function listenToFeed() {
       const feedContainer = document.getElementById('feedContainer');
       
-      // Query everything ordered by time, limit to newest 100
       unsubscribeFeed = db.collection('questions')
         .orderBy('createdAt', 'desc')
         .limit(100)
@@ -696,7 +731,6 @@
       snapshot.forEach(doc => {
         const item = doc.data();
         
-        // Apply client-side filters
         if (currentFilter === 'MyMind' && item.authorId !== currentUserId) return;
         if (currentFilter !== 'All' && currentFilter !== 'MyMind' && item.emotion !== currentFilter) return;
 
@@ -719,8 +753,6 @@
       const dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
       const rawEmotion = data.emotion || 'lost';
       const emotionClass = `badge-${rawEmotion.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-
-      // Check if current user is the owner
       const isOwner = data.authorId === currentUserId;
 
       card.innerHTML = `
