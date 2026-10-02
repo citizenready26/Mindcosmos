@@ -167,7 +167,6 @@
       border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    /* Make emotions in the composer a neat, scrollable single line */
     .emotion-picker {
       display: flex;
       flex-wrap: nowrap; 
@@ -178,7 +177,7 @@
       padding-bottom: 4px;
       -webkit-overflow-scrolling: touch;
     }
-    
+
     .emotion-picker::-webkit-scrollbar {
       display: none;
     }
@@ -251,6 +250,12 @@
 
     .scroll-btn:hover {
       color: var(--text);
+    }
+
+    @media (max-width: 600px) {
+      .scroll-btn {
+        display: none;
+      }
     }
 
     .filter-bar {
@@ -419,12 +424,33 @@
       font-size: 0.86rem;
       line-height: 1.45;
       color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .reply-content {
+      flex: 1;
     }
 
     .reply-time {
       font-size: 0.68rem;
       color: var(--text-muted);
       margin-top: 4px;
+    }
+
+    .btn-delete-reply {
+      background: transparent;
+      border: none;
+      font-size: 0.85rem;
+      cursor: pointer;
+      opacity: 0.4;
+      transition: opacity 0.15s;
+    }
+
+    .btn-delete-reply:hover {
+      opacity: 1;
     }
 
     .reply-input-box {
@@ -564,12 +590,6 @@
       color: var(--text-muted);
       font-size: 0.9rem;
     }
-    /* Hide scroll arrows on mobile screens */
-    @media (max-width: 600px) {
-      .scroll-btn {
-        display: none;
-      }
-    }
   </style>
 
   <!-- Firebase Compat SDK -->
@@ -669,12 +689,11 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Horizontal Scroll Function
     function scrollFilters(amount) {
       document.getElementById('filterBar').scrollBy({ left: amount, behavior: 'smooth' });
     }
 
-    // 2. Invisible Auth & Sync Key Generation
+    // 2. Invisible Auth & Deterministic Sync Key Logic
     const WORD_LIST = ["silent", "orbit", "cloud", "shadow", "spark", "echo", "harbor", "drift", "pulse", "depth", "light", "river"];
 
     function generateSyncKey() {
@@ -684,28 +703,35 @@
       return `${p1}-${p2}-${p3}`;
     }
 
-    let currentUserId = localStorage.getItem('inmind_uid');
-    let currentSyncKey = localStorage.getItem('inmind_sync_key');
+    function deriveIdFromKey(key) {
+      return 'usr_' + btoa(key).replace(/=/g, '').toLowerCase();
+    }
 
-    if (!currentUserId || !currentSyncKey) {
-      currentUserId = 'usr_' + Math.random().toString(36).substring(2, 10);
+    let currentSyncKey = localStorage.getItem('inmind_sync_key');
+    let currentUserId = localStorage.getItem('inmind_uid');
+
+    if (!currentSyncKey) {
       currentSyncKey = generateSyncKey();
-      localStorage.setItem('inmind_uid', currentUserId);
+      currentUserId = deriveIdFromKey(currentSyncKey);
       localStorage.setItem('inmind_sync_key', currentSyncKey);
+      localStorage.setItem('inmind_uid', currentUserId);
+    } else {
+      currentUserId = deriveIdFromKey(currentSyncKey);
+      localStorage.setItem('inmind_uid', currentUserId);
     }
 
     document.getElementById('syncKeyDisplay').innerText = currentSyncKey;
 
     // 3. State & Filtering
     let currentFilter = 'All';
-    let unsubscribeFeed = null;
+    let allQuestionsCache = [];
+    let userInteractedQuestionIds = new Set();
 
     function setFilter(filterType, element) {
       currentFilter = filterType;
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
       element.classList.add('active');
-      
-      if (lastSnapshot) renderFeed(lastSnapshot);
+      renderFeed();
     }
 
     function timeAgo(date) {
@@ -720,50 +746,76 @@
       return `${days}d ago`;
     }
 
-    // 4. Real-time Feed Listener
-    let lastSnapshot = null;
-
+    // 4. Real-time Feed Listener with Interaction Tracking
     function listenToFeed() {
       const feedContainer = document.getElementById('feedContainer');
       
-      unsubscribeFeed = db.collection('questions')
+      db.collection('questions')
         .orderBy('createdAt', 'desc')
         .limit(100)
         .onSnapshot(snapshot => {
-          lastSnapshot = snapshot;
-          renderFeed(snapshot);
+          allQuestionsCache = [];
+          
+          let pendingFetches = snapshot.docs.length;
+          if (pendingFetches === 0) {
+            renderFeed();
+            return;
+          }
+
+          snapshot.forEach(doc => {
+            const qData = doc.id;
+            const item = doc.data();
+            item.id = doc.id;
+            allQuestionsCache.push(item);
+
+            // Check answers subcollection to see if user has interacted
+            db.collection('questions').doc(doc.id).collection('answers')
+              .where('authorId', '==', currentUserId)
+              .get()
+              .then(ansSnap => {
+                if (!ansSnap.empty) {
+                  userInteractedQuestionIds.add(doc.id);
+                }
+              })
+              .catch(err => console.error("Error fetching user replies:", err))
+              .finally(() => {
+                pendingFetches--;
+                if (pendingFetches === 0) {
+                  renderFeed();
+                }
+              });
+          });
         }, err => {
           console.error("Firestore feed error:", err);
           feedContainer.innerHTML = `<div class="empty-state">Unable to load feed. Check Firestore Security Rules.</div>`;
         });
     }
 
-    function renderFeed(snapshot) {
+    function renderFeed() {
       const feedContainer = document.getElementById('feedContainer');
       feedContainer.innerHTML = '';
       let visibleCount = 0;
 
-      snapshot.forEach(doc => {
-        const item = doc.data();
-        
-        if (currentFilter === 'MyFeed' && item.authorId !== currentUserId) return;
+      allQuestionsCache.forEach(item => {
+        // My feed includes: Created by user OR user has replied to it
+        if (currentFilter === 'MyFeed' && item.authorId !== currentUserId && !userInteractedQuestionIds.has(item.id)) return;
         if (currentFilter !== 'All' && currentFilter !== 'MyFeed' && item.emotion !== currentFilter) return;
 
         visibleCount++;
-        const card = createCardElement(doc.id, item);
+        const card = createCardElement(item);
         feedContainer.appendChild(card);
       });
 
       if (visibleCount === 0) {
-        feedContainer.innerHTML = `<div class="empty-state">${currentFilter === 'MyFeed' ? "You haven't released any thoughts yet." : "No thoughts found in this space yet."}</div>`;
+        feedContainer.innerHTML = `<div class="empty-state">${currentFilter === 'MyFeed' ? "Your feed is empty. Release a thought or answer someone to see it here." : "No thoughts found in this space yet."}</div>`;
       }
     }
 
     // 5. Card UI Rendering & Accordion Replies
-    function createCardElement(id, data) {
+    function createCardElement(data) {
       const card = document.createElement('div');
       card.className = 'card';
-      card.id = `card-${id}`;
+      card.id = `card-${data.id}`;
 
       const dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
       const rawEmotion = data.emotion || 'lost';
@@ -777,18 +829,18 @@
         </div>
         <div class="card-question">${escapeHtml(data.text)}</div>
         <div class="card-actions">
-          <button class="btn-toggle-replies" onclick="toggleReplies('${id}')">
-            💬 <span id="reply-count-${id}">${data.replyCount || 0}</span> answers
+          <button class="btn-toggle-replies" onclick="toggleReplies('${data.id}')">
+            💬 <span id="reply-count-${data.id}">${data.replyCount || 0}</span> answers
           </button>
-          ${isOwner ? `<button class="btn-delete-card" onclick="handleDeleteQuestion('${id}')" title="Delete thought">🗑️</button>` : ''}
+          ${isOwner ? `<button class="btn-delete-card" onclick="handleDeleteQuestion('${data.id}')" title="Delete thought">🗑️</button>` : ''}
         </div>
-        <div class="replies-section" id="replies-${id}">
-          <div class="replies-list" id="replies-list-${id}">
+        <div class="replies-section" id="replies-${data.id}">
+          <div class="replies-list" id="replies-list-${data.id}">
             <div style="font-size:0.75rem; color:var(--text-muted);">Loading answers...</div>
           </div>
           <div class="reply-input-box">
-            <input type="text" id="input-${id}" placeholder="Provide clarity or comfort..." maxlength="200" onkeydown="if(event.key==='Enter') submitReply('${id}')">
-            <button class="btn-submit-reply" onclick="submitReply('${id}')">Answer</button>
+            <input type="text" id="input-${data.id}" placeholder="Provide clarity or comfort..." maxlength="200" onkeydown="if(event.key==='Enter') submitReply('${data.id}')">
+            <button class="btn-submit-reply" onclick="submitReply('${data.id}')">Answer</button>
           </div>
         </div>
       `;
@@ -801,7 +853,7 @@
       return div.innerHTML;
     }
 
-    // 6. Delete Question Handler
+    // 6. Delete Question & Reply Handlers
     async function handleDeleteQuestion(qId) {
       if (!confirm("Are you sure you want to permanently delete this thought?")) return;
 
@@ -810,6 +862,21 @@
       } catch (err) {
         console.error("Error deleting post:", err);
         alert("Failed to delete. Make sure delete permissions are enabled in Firebase rules.");
+      }
+    }
+
+    async function handleDeleteReply(qId, ansId) {
+      if (!confirm("Delete your answer?")) return;
+
+      try {
+        const qRef = db.collection('questions').doc(qId);
+        await qRef.collection('answers').doc(ansId).delete();
+        await qRef.update({
+          replyCount: firebase.firestore.FieldValue.increment(-1)
+        });
+      } catch (err) {
+        console.error("Error deleting answer:", err);
+        alert("Failed to delete answer.");
       }
     }
 
@@ -845,12 +912,18 @@
           listContainer.innerHTML = '';
           snap.forEach(doc => {
             const reply = doc.data();
+            const ansId = doc.id;
             const dateObj = reply.createdAt ? reply.createdAt.toDate() : new Date();
+            const isReplyOwner = reply.authorId === currentUserId;
+
             const replyEl = document.createElement('div');
             replyEl.className = 'reply-bubble';
             replyEl.innerHTML = `
-              <div>${escapeHtml(reply.text)}</div>
-              <div class="reply-time">${timeAgo(dateObj)}</div>
+              <div class="reply-content">
+                <div>${escapeHtml(reply.text)}</div>
+                <div class="reply-time">${timeAgo(dateObj)}</div>
+              </div>
+              ${isReplyOwner ? `<button class="btn-delete-reply" onclick="handleDeleteReply('${qId}', '${ansId}')" title="Delete answer">🗑️</button>` : ''}
             `;
             listContainer.appendChild(replyEl);
           });
@@ -909,6 +982,8 @@
         await qRef.update({
           replyCount: firebase.firestore.FieldValue.increment(1)
         });
+
+        userInteractedQuestionIds.add(qId);
       } catch (err) {
         console.error("Error submitting answer:", err);
       }
@@ -924,18 +999,19 @@
     }
 
     function handleRestoreKey() {
-      const key = document.getElementById('restoreKeyInput').value.trim();
+      const key = document.getElementById('restoreKeyInput').value.trim().toLowerCase();
       if (!key) return;
       
       localStorage.setItem('inmind_sync_key', key);
-      localStorage.setItem('inmind_uid', 'usr_' + btoa(key).replace(/=/g, '').toLowerCase());
-      
-      currentUserId = localStorage.getItem('inmind_uid');
       currentSyncKey = key;
+      currentUserId = deriveIdFromKey(key);
+      localStorage.setItem('inmind_uid', currentUserId);
+      
       document.getElementById('syncKeyDisplay').innerText = key;
       closeSyncModal();
       
-      if (lastSnapshot) renderFeed(lastSnapshot);
+      userInteractedQuestionIds.clear();
+      listenToFeed();
     }
 
     // Initial Load
