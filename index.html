@@ -27,7 +27,7 @@
       --tag-hopeful: #10b981;
       --tag-happy: #facc15;
       --tag-excited: #fb923c;
-      --tag-unexplainable: #38bdf8;
+      --tag-cant-explain: #38bdf8;
     }
 
     * {
@@ -881,6 +881,8 @@
         await qRef.update({
           replyCount: firebase.firestore.FieldValue.increment(-1)
         });
+        userInteractedQuestionIds.delete(qId);
+        renderFeed();
       } catch (err) {
         console.error("Error deleting answer:", err);
         alert("Failed to delete answer.");
@@ -991,6 +993,7 @@
         });
 
         userInteractedQuestionIds.add(qId);
+        renderFeed();
       } catch (err) {
         console.error("Error submitting answer:", err);
       }
