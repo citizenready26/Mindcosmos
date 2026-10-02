@@ -167,11 +167,20 @@
       border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
+    /* Make emotions in the composer a neat, scrollable single line */
     .emotion-picker {
       display: flex;
-      flex-wrap: wrap; 
-      gap: 6px;
+      flex-wrap: nowrap; 
+      gap: 8px;
       width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .emotion-picker::-webkit-scrollbar {
+      display: none;
     }
 
     .emotion-radio {
