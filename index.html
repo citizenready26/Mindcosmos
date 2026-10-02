@@ -14,10 +14,10 @@
       --surface: #11151f;
       --surface-hover: #171d2b;
       --border: #1e2638;
-      --border-focus: #6366f1;
+      --border-focus: #3b82f6;
       --text: #f1f5f9;
       --text-muted: #808ea3;
-      --accent: #6366f1;
+      --accent: #3b82f6;
       
       --tag-anxious: #f59e0b;
       --tag-overwhelmed: #ef4444;
@@ -78,36 +78,27 @@
 
     .brand {
       display: flex;
-      align-items: center;
+      flex-direction: column;
       text-decoration: none;
     }
 
-    .brand-logo {
-      font-size: 1.25rem;
+    .brand-title {
+      color: #3b82f6;
+      font-size: 1.3rem;
       font-weight: 700;
-      letter-spacing: -0.4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
     }
 
-    .cosmos-text {
-      background: linear-gradient(135deg, #c084fc, #6366f1, #38bdf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .brand-by {
-      font-size: 0.75rem;
+    .brand-subtitle {
+      font-size: 0.7rem;
       color: var(--text-muted);
-      font-weight: 400;
-      text-transform: lowercase;
+      margin-top: 2px;
     }
-
-    .neon-inmind {
+    
+    .brand-subtitle span {
       color: #ffffff;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.4);
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .sync-badge {
@@ -140,7 +131,7 @@
     }
 
     .composer:focus-within {
-      border-color: rgba(99, 102, 241, 0.5);
+      border-color: rgba(59, 130, 246, 0.5);
     }
 
     .composer textarea {
@@ -175,6 +166,11 @@
       overflow-x: auto;
       padding-bottom: 2px;
       max-width: 100%;
+      scrollbar-width: none; /* Hide in Firefox */
+    }
+
+    .emotion-picker::-webkit-scrollbar {
+      display: none; /* Hide in Chrome/Safari */
     }
 
     .emotion-radio {
@@ -348,17 +344,15 @@
     .btn-delete-card {
       background: transparent;
       border: none;
-      color: #ef4444;
-      font-size: 0.74rem;
-      font-weight: 500;
+      font-size: 1.05rem;
       cursor: pointer;
-      opacity: 0.6;
-      transition: opacity 0.15s;
+      opacity: 0.5;
+      transition: opacity 0.15s, transform 0.15s;
     }
 
     .btn-delete-card:hover {
       opacity: 1;
-      text-decoration: underline;
+      transform: scale(1.1);
     }
 
     /* Accordion Replies */
@@ -477,7 +471,7 @@
       border-radius: 8px;
       font-family: monospace;
       font-size: 0.95rem;
-      color: #38bdf8;
+      color: var(--accent);
       user-select: all;
       margin-bottom: 20px;
       text-align: center;
@@ -545,11 +539,8 @@
   <header>
     <div class="header-inner">
       <a href="#" class="brand">
-        <div class="brand-logo">
-          <span class="cosmos-text">MindCosmos</span>
-          <span class="brand-by">by</span>
-          <span class="neon-inmind">inMind</span>
-        </div>
+        <div class="brand-title">MindCosmos</div>
+        <div class="brand-subtitle">by <span>inMind</span></div>
       </a>
       <div class="sync-badge" onclick="openSyncModal()">
         <span>🔑 Sync Key</span>
@@ -661,7 +652,9 @@
       currentFilter = filterType;
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
       element.classList.add('active');
-      listenToFeed();
+      
+      // Re-render feed with new filter
+      if (lastSnapshot) renderFeed(lastSnapshot);
     }
 
     function timeAgo(date) {
@@ -676,35 +669,45 @@
       return `${days}d ago`;
     }
 
-    // 4. Real-time Feed Listener
+    // 4. Real-time Feed Listener (Client-side filtering to bypass Firestore Index errors)
+    let lastSnapshot = null;
+
     function listenToFeed() {
-      if (unsubscribeFeed) unsubscribeFeed();
-
       const feedContainer = document.getElementById('feedContainer');
-      let query = db.collection('questions').orderBy('createdAt', 'desc').limit(40);
-
-      if (currentFilter === 'MyMind') {
-        query = db.collection('questions').where('authorId', '==', currentUserId).orderBy('createdAt', 'desc');
-      } else if (currentFilter !== 'All') {
-        query = db.collection('questions').where('emotion', '==', currentFilter).orderBy('createdAt', 'desc');
-      }
-
-      unsubscribeFeed = query.onSnapshot(snapshot => {
-        if (snapshot.empty) {
-          feedContainer.innerHTML = `<div class="empty-state">${currentFilter === 'MyMind' ? "You haven't released any thoughts yet." : "No thoughts found in this space yet."}</div>`;
-          return;
-        }
-
-        feedContainer.innerHTML = '';
-        snapshot.forEach(doc => {
-          const item = doc.data();
-          const card = createCardElement(doc.id, item);
-          feedContainer.appendChild(card);
+      
+      // Query everything ordered by time, limit to newest 100
+      unsubscribeFeed = db.collection('questions')
+        .orderBy('createdAt', 'desc')
+        .limit(100)
+        .onSnapshot(snapshot => {
+          lastSnapshot = snapshot;
+          renderFeed(snapshot);
+        }, err => {
+          console.error("Firestore feed error:", err);
+          feedContainer.innerHTML = `<div class="empty-state">Unable to load feed. Check Firestore Security Rules.</div>`;
         });
-      }, err => {
-        console.error("Firestore feed error:", err);
-        feedContainer.innerHTML = `<div class="empty-state">Unable to load feed. Check Firestore Security Rules.</div>`;
+    }
+
+    function renderFeed(snapshot) {
+      const feedContainer = document.getElementById('feedContainer');
+      feedContainer.innerHTML = '';
+      let visibleCount = 0;
+
+      snapshot.forEach(doc => {
+        const item = doc.data();
+        
+        // Apply client-side filters
+        if (currentFilter === 'MyMind' && item.authorId !== currentUserId) return;
+        if (currentFilter !== 'All' && currentFilter !== 'MyMind' && item.emotion !== currentFilter) return;
+
+        visibleCount++;
+        const card = createCardElement(doc.id, item);
+        feedContainer.appendChild(card);
       });
+
+      if (visibleCount === 0) {
+        feedContainer.innerHTML = `<div class="empty-state">${currentFilter === 'MyMind' ? "You haven't released any thoughts yet." : "No thoughts found in this space yet."}</div>`;
+      }
     }
 
     // 5. Card UI Rendering & Accordion Replies
@@ -730,7 +733,7 @@
           <button class="btn-toggle-replies" onclick="toggleReplies('${id}')">
             💬 <span id="reply-count-${id}">${data.replyCount || 0}</span> answers
           </button>
-          ${isOwner ? `<button class="btn-delete-card" onclick="handleDeleteQuestion('${id}')">Delete thought</button>` : ''}
+          ${isOwner ? `<button class="btn-delete-card" onclick="handleDeleteQuestion('${id}')" title="Delete thought">🗑️</button>` : ''}
         </div>
         <div class="replies-section" id="replies-${id}">
           <div class="replies-list" id="replies-list-${id}">
@@ -884,7 +887,8 @@
       currentSyncKey = key;
       document.getElementById('syncKeyDisplay').innerText = key;
       closeSyncModal();
-      listenToFeed();
+      
+      if (lastSnapshot) renderFeed(lastSnapshot);
     }
 
     // Initial Load
