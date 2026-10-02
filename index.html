@@ -19,14 +19,14 @@
       --text-muted: #808ea3;
       --accent: #3b82f6;
       
+      --tag-happy: #facc15;
+      --tag-excited: #fb923c;
       --tag-anxious: #f59e0b;
       --tag-overwhelmed: #ef4444;
       --tag-lost: #8b5cf6;
       --tag-angry: #ec4899;
       --tag-numb: #64748b;
       --tag-hopeful: #10b981;
-      --tag-happy: #facc15;
-      --tag-excited: #fb923c;
       --tag-cant-explain: #38bdf8;
     }
 
@@ -338,14 +338,14 @@
       background: rgba(255, 255, 255, 0.05);
     }
 
+    .badge-happy { color: var(--tag-happy); background: rgba(250, 204, 21, 0.12); }
+    .badge-excited { color: var(--tag-excited); background: rgba(251, 146, 60, 0.12); }
     .badge-anxious { color: var(--tag-anxious); background: rgba(245, 158, 11, 0.12); }
     .badge-overwhelmed { color: var(--tag-overwhelmed); background: rgba(239, 68, 68, 0.12); }
     .badge-lost { color: var(--tag-lost); background: rgba(139, 92, 246, 0.12); }
     .badge-angry { color: var(--tag-angry); background: rgba(236, 72, 153, 0.12); }
     .badge-numb { color: var(--tag-numb); background: rgba(100, 116, 139, 0.12); }
     .badge-hopeful { color: var(--tag-hopeful); background: rgba(16, 185, 129, 0.12); }
-    .badge-happy { color: var(--tag-happy); background: rgba(250, 204, 21, 0.12); }
-    .badge-excited { color: var(--tag-excited); background: rgba(251, 146, 60, 0.12); }
     .badge-cant-explain { color: var(--tag-unexplainable); background: rgba(56, 189, 248, 0.12); }
 
     .card-time {
@@ -622,14 +622,14 @@
       <textarea id="questionInput" placeholder="What thought or feeling is in your mind right now?" maxlength="320"></textarea>
       <div class="composer-footer">
         <div class="emotion-picker">
-          <label><input type="radio" name="emotion" value="Anxious" class="emotion-radio" checked><span class="emotion-label">Anxious</span></label>
+          <label><input type="radio" name="emotion" value="Happy" class="emotion-radio" checked><span class="emotion-label">Happy</span></label>
+          <label><input type="radio" name="emotion" value="Excited" class="emotion-radio"><span class="emotion-label">Excited</span></label>
+          <label><input type="radio" name="emotion" value="Anxious" class="emotion-radio"><span class="emotion-label">Anxious</span></label>
           <label><input type="radio" name="emotion" value="Overwhelmed" class="emotion-radio"><span class="emotion-label">Overwhelmed</span></label>
           <label><input type="radio" name="emotion" value="Lost" class="emotion-radio"><span class="emotion-label">Lost</span></label>
           <label><input type="radio" name="emotion" value="Angry" class="emotion-radio"><span class="emotion-label">Angry</span></label>
           <label><input type="radio" name="emotion" value="Numb" class="emotion-radio"><span class="emotion-label">Numb</span></label>
           <label><input type="radio" name="emotion" value="Hopeful" class="emotion-radio"><span class="emotion-label">Hopeful</span></label>
-          <label><input type="radio" name="emotion" value="Happy" class="emotion-radio"><span class="emotion-label">Happy</span></label>
-          <label><input type="radio" name="emotion" value="Excited" class="emotion-radio"><span class="emotion-label">Excited</span></label>
           <label><input type="radio" name="emotion" value="Can't Explain" class="emotion-radio"><span class="emotion-label">I can't explain</span></label>
         </div>
         <button class="btn-post" id="postBtn" onclick="handlePostQuestion()">Release</button>
@@ -642,14 +642,14 @@
       <div class="filter-bar" id="filterBar">
         <button class="filter-btn active" onclick="setFilter('All', this)">All Feeds</button>
         <button class="filter-btn special-filter" onclick="setFilter('MyFeed', this)">My feed</button>
+        <button class="filter-btn" onclick="setFilter('Happy', this)">Happy</button>
+        <button class="filter-btn" onclick="setFilter('Excited', this)">Excited</button>
         <button class="filter-btn" onclick="setFilter('Anxious', this)">Anxious</button>
         <button class="filter-btn" onclick="setFilter('Overwhelmed', this)">Overwhelmed</button>
         <button class="filter-btn" onclick="setFilter('Lost', this)">Lost</button>
         <button class="filter-btn" onclick="setFilter('Angry', this)">Angry</button>
         <button class="filter-btn" onclick="setFilter('Numb', this)">Numb</button>
         <button class="filter-btn" onclick="setFilter('Hopeful', this)">Hopeful</button>
-        <button class="filter-btn" onclick="setFilter('Happy', this)">Happy</button>
-        <button class="filter-btn" onclick="setFilter('Excited', this)">Excited</button>
         <button class="filter-btn" onclick="setFilter('Can\'t Explain', this)">I can't explain</button>
       </div>
       <button class="scroll-btn" onclick="scrollFilters(150)" title="Scroll Right">&#10095;</button>
@@ -944,7 +944,7 @@
       const input = document.getElementById('questionInput');
       const text = input.value.trim();
       const emotionRadio = document.querySelector('input[name="emotion"]:checked');
-      const emotion = emotionRadio ? emotionRadio.value : 'Anxious';
+      const emotion = emotionRadio ? emotionRadio.value : 'Happy';
       const postBtn = document.getElementById('postBtn');
 
       if (!text) return;
