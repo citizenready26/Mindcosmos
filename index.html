@@ -169,15 +169,22 @@
       border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
+    /* Scrollable Picker Row with Arrows */
+    .picker-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      width: 100%;
+    }
+
     .emotion-picker {
       display: flex;
-      flex-wrap: nowrap; 
       gap: 8px;
-      width: 100%;
       overflow-x: auto;
       scrollbar-width: none;
-      padding-bottom: 4px;
-      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      flex: 1;
+      padding-bottom: 2px;
     }
 
     .emotion-picker::-webkit-scrollbar {
@@ -621,16 +628,20 @@
     <div class="composer">
       <textarea id="questionInput" placeholder="What thought or feeling is in your mind right now?" maxlength="320"></textarea>
       <div class="composer-footer">
-        <div class="emotion-picker">
-          <label><input type="radio" name="emotion" value="Happy" class="emotion-radio" checked><span class="emotion-label">Happy</span></label>
-          <label><input type="radio" name="emotion" value="Excited" class="emotion-radio"><span class="emotion-label">Excited</span></label>
-          <label><input type="radio" name="emotion" value="Anxious" class="emotion-radio"><span class="emotion-label">Anxious</span></label>
-          <label><input type="radio" name="emotion" value="Overwhelmed" class="emotion-radio"><span class="emotion-label">Overwhelmed</span></label>
-          <label><input type="radio" name="emotion" value="Lost" class="emotion-radio"><span class="emotion-label">Lost</span></label>
-          <label><input type="radio" name="emotion" value="Angry" class="emotion-radio"><span class="emotion-label">Angry</span></label>
-          <label><input type="radio" name="emotion" value="Numb" class="emotion-radio"><span class="emotion-label">Numb</span></label>
-          <label><input type="radio" name="emotion" value="Hopeful" class="emotion-radio"><span class="emotion-label">Hopeful</span></label>
-          <label><input type="radio" name="emotion" value="Can't Explain" class="emotion-radio"><span class="emotion-label">I can't explain</span></label>
+        <div class="picker-wrapper">
+          <button class="scroll-btn" onclick="scrollPicker(-150)" title="Scroll Left">&#10094;</button>
+          <div class="emotion-picker" id="emotionPicker">
+            <label><input type="radio" name="emotion" value="Happy" class="emotion-radio" checked><span class="emotion-label">Happy</span></label>
+            <label><input type="radio" name="emotion" value="Excited" class="emotion-radio"><span class="emotion-label">Excited</span></label>
+            <label><input type="radio" name="emotion" value="Anxious" class="emotion-radio"><span class="emotion-label">Anxious</span></label>
+            <label><input type="radio" name="emotion" value="Overwhelmed" class="emotion-radio"><span class="emotion-label">Overwhelmed</span></label>
+            <label><input type="radio" name="emotion" value="Lost" class="emotion-radio"><span class="emotion-label">Lost</span></label>
+            <label><input type="radio" name="emotion" value="Angry" class="emotion-radio"><span class="emotion-label">Angry</span></label>
+            <label><input type="radio" name="emotion" value="Numb" class="emotion-radio"><span class="emotion-label">Numb</span></label>
+            <label><input type="radio" name="emotion" value="Hopeful" class="emotion-radio"><span class="emotion-label">Hopeful</span></label>
+            <label><input type="radio" name="emotion" value="Can't Explain" class="emotion-radio"><span class="emotion-label">I can't explain</span></label>
+          </div>
+          <button class="scroll-btn" onclick="scrollPicker(150)" title="Scroll Right">&#10095;</button>
         </div>
         <button class="btn-post" id="postBtn" onclick="handlePostQuestion()">Release</button>
       </div>
@@ -699,6 +710,10 @@
 
     function scrollFilters(amount) {
       document.getElementById('filterBar').scrollBy({ left: amount, behavior: 'smooth' });
+    }
+
+    function scrollPicker(amount) {
+      document.getElementById('emotionPicker').scrollBy({ left: amount, behavior: 'smooth' });
     }
 
     // 2. Foolproof Deterministic Sync Key Logic
