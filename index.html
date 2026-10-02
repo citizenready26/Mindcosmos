@@ -677,13 +677,13 @@
   <div class="modal-backdrop" id="syncModal">
     <div class="modal">
       <h3>Invisible Identity</h3>
-      <p>Your session is stored locally. Save this 3-word Sync Key to access your question history on any other browser or device.</p>
+      <p>Your session is stored locally. Save this 6-digit number Sync Key to access your question history on any other browser or device.</p>
       
       <div class="sync-key-display" id="syncKeyDisplay">...</div>
 
       <div class="modal-inputs">
         <label style="font-size:0.75rem; color:var(--text-muted)">Have an existing Sync Key?</label>
-        <input type="text" id="restoreKeyInput" placeholder="word-word-word">
+        <input type="text" id="restoreKeyInput" placeholder="123456">
       </div>
 
       <div class="modal-actions">
@@ -716,18 +716,15 @@
       document.getElementById('emotionPicker').scrollBy({ left: amount, behavior: 'smooth' });
     }
 
-    // 2. Foolproof Deterministic Sync Key Logic
-    const WORD_LIST = ["silent", "orbit", "cloud", "shadow", "spark", "echo", "harbor", "drift", "pulse", "depth", "light", "river"];
-
+    // 2. Numerical Sync Key Generator & Derivation
     function generateSyncKey() {
-      const p1 = WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
-      const p2 = WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
-      const p3 = WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
-      return `${p1}-${p2}-${p3}`;
+      // Generates a clean 6-digit format like "482901"
+      const num = Math.floor(100000 + Math.random() * 900000);
+      return num.toString();
     }
 
     function deriveIdFromKey(key) {
-      const cleanKey = key.trim().toLowerCase();
+      const cleanKey = key.trim();
       return 'usr_' + btoa(cleanKey).replace(/=/g, '');
     }
 
@@ -1025,10 +1022,10 @@
 
     function handleRestoreKey() {
       const rawInput = document.getElementById('restoreKeyInput').value;
-      const key = rawInput.trim().toLowerCase();
+      const key = rawInput.trim();
       
       if (!key) {
-        alert("Please type your 3-word Sync Key.");
+        alert("Please type your numerical Sync Key.");
         return;
       }
       
