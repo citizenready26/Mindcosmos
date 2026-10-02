@@ -137,15 +137,45 @@
       cursor: pointer;
       width: 100%;
       transition: transform 0.1s, opacity 0.2s;
-      margin-bottom: 16px;
     }
 
-    .btn-main-auth:hover {
-      opacity: 0.9;
+    .btn-main-auth:hover { opacity: 0.9; }
+    .btn-main-auth:active { transform: scale(0.98); }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 16px 0;
+      color: var(--text-muted);
+      font-size: 0.8rem;
     }
-    .btn-main-auth:active {
-      transform: scale(0.98);
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--border);
     }
+    .divider:not(:empty)::before { margin-right: .5em; }
+    .divider:not(:empty)::after { margin-left: .5em; }
+
+    .btn-google-auth {
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.1s, opacity 0.2s;
+      margin-bottom: 16px;
+    }
+    .btn-google-auth:hover { opacity: 0.9; }
 
     .auth-links {
       display: flex;
@@ -162,9 +192,7 @@
       transition: color 0.2s;
     }
 
-    .auth-link:hover {
-      color: var(--text);
-    }
+    .auth-link:hover { color: var(--text); }
 
     .auth-error {
       color: #ef4444;
@@ -177,7 +205,7 @@
        Main Application (Hidden by Default)
        ----------------------------------- */
     #mainApp {
-      display: none; /* Controlled by JS */
+      display: none; 
       width: 100%;
       flex-direction: column;
       align-items: center;
@@ -190,7 +218,6 @@
       padding: 0 16px;
     }
 
-    /* Sticky Header */
     header {
       position: sticky;
       top: 0;
@@ -215,12 +242,7 @@
       justify-content: space-between;
     }
 
-    .brand {
-      display: flex;
-      flex-direction: column;
-      text-decoration: none;
-    }
-
+    .brand { display: flex; flex-direction: column; text-decoration: none; }
     .brand-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; line-height: 1.1; }
     .brand-title .mind { color: #ffffff; }
     .brand-title .cosmos { background: linear-gradient(180deg, #60a5fa 0%, #2563eb 50%, #1e3a8a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -242,14 +264,12 @@
     }
     .auth-badge:hover { border-color: var(--border-focus); color: var(--text); }
 
-    /* Composer Box */
     .composer { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 24px; transition: border-color 0.2s; }
     .composer:focus-within { border-color: rgba(59, 130, 246, 0.5); }
     .composer textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-size: 0.98rem; line-height: 1.5; resize: none; min-height: 72px; }
     .composer textarea::placeholder { color: var(--text-muted); }
     .composer-footer { display: flex; flex-direction: column; gap: 12px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.05); }
 
-    /* Pickers & Filters */
     .picker-wrapper, .filter-wrapper { display: flex; align-items: center; gap: 4px; width: 100%; }
     .filter-wrapper { margin-bottom: 16px; }
     .scroll-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; padding: 0 4px; display: flex; align-items: center; justify-content: center; transition: color 0.15s; }
@@ -272,7 +292,6 @@
     .btn-post:hover { opacity: 0.9; }
     .btn-post:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* Feed & Cards */
     .feed { display: flex; flex-direction: column; gap: 14px; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; transition: background 0.15s, border-color 0.15s; }
     .card:hover { border-color: rgba(255, 255, 255, 0.12); }
@@ -297,7 +316,6 @@
     .btn-delete-card { background: transparent; border: none; font-size: 1.05rem; cursor: pointer; opacity: 0.5; transition: opacity 0.15s, transform 0.15s; }
     .btn-delete-card:hover { opacity: 1; transform: scale(1.1); }
 
-    /* Accordion Replies */
     .replies-section { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); }
     .replies-section.open { display: block; }
     .replies-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
@@ -316,7 +334,6 @@
     .empty-state { text-align: center; padding: 48px 16px; color: var(--text-muted); font-size: 0.9rem; }
   </style>
 
-  <!-- Firebase Compat SDKs (App, Auth, Firestore) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -342,6 +359,19 @@
       </div>
 
       <button class="btn-main-auth" id="authSubmitBtn" onclick="handleAuthSubmit()">Sign In</button>
+
+      <div class="divider">OR</div>
+
+      <button class="btn-google-auth" onclick="handleGoogleSignIn()">
+        <!-- Google G Logo SVG -->
+        <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
 
       <div class="auth-links">
         <button class="auth-link" id="forgotPasswordBtn" onclick="handleForgotPassword()">Forgot password?</button>
@@ -419,7 +449,7 @@
   </div>
 
   <script>
-    // 1. Firebase Initialization (Replace with your actual config if needed)
+    // 1. Firebase Initialization (Replace with your actual config)
     const firebaseConfig = {
       apiKey: "AIzaSyC_jtZZWz6h9qMAZa7nsNX-pdzt6qjyIno",
       authDomain: "inmind-8e8fb.firebaseapp.com",
@@ -444,24 +474,20 @@
 
     // 3. Auth State Observer (The Gatekeeper)
     auth.onAuthStateChanged(user => {
-      if (user) {
-        // User is logged in: Hide Auth, Show App
+      if (user && user.emailVerified) {
         currentUserId = user.uid;
         welcomeScreen.style.display = 'none';
         mainApp.style.display = 'flex';
         
-        // Update header badge with email prefix
         const emailPrefix = user.email.split('@')[0];
         document.getElementById('authBadgeText').innerHTML = `<span>👤 ${emailPrefix} (Sign Out)</span>`;
         
-        listenToFeed(); // Load the data
+        listenToFeed(); 
       } else {
-        // User is logged out: Show Auth, Hide App
         currentUserId = null;
         welcomeScreen.style.display = 'flex';
         mainApp.style.display = 'none';
         
-        // Clean up feed listeners if they exist
         if (unsubscribeFeed) {
           unsubscribeFeed();
           unsubscribeFeed = null;
@@ -479,13 +505,14 @@
       document.getElementById('authSubmitBtn').innerText = isSignUpMode ? "Create Account" : "Sign In";
       document.getElementById('authToggleBtn').innerHTML = isSignUpMode ? "Already have an account? <strong>Sign In</strong>" : "Need an account? <strong>Sign Up</strong>";
       
-      // Hide forgot password on sign up mode
       document.getElementById('forgotPasswordBtn').style.display = isSignUpMode ? 'none' : 'block';
     }
 
     async function handleAuthSubmit() {
       const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value.trim();
+      
+      errorMsg.style.color = '#ef4444';
       errorMsg.innerText = '';
 
       if (!email || !password) {
@@ -499,15 +526,23 @@
 
       try {
         if (isSignUpMode) {
-          await auth.createUserWithEmailAndPassword(email, password);
+          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+          await userCredential.user.sendEmailVerification();
+          await auth.signOut();
+          
+          errorMsg.style.color = '#10b981';
+          errorMsg.innerText = "Account created! Check your inbox to verify your email before signing in.";
         } else {
-          await auth.signInWithEmailAndPassword(email, password);
+          const userCredential = await auth.signInWithEmailAndPassword(email, password);
+          if (!userCredential.user.emailVerified) {
+            await auth.signOut();
+            errorMsg.style.color = '#f59e0b';
+            errorMsg.innerText = "Please verify your email address first. Check your inbox!";
+          }
         }
-        // Success handled by onAuthStateChanged
       } catch (err) {
-        // Clean up Firebase error messages for the user
         let message = err.message;
-        if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
           message = "Invalid email or password.";
         } else if (err.code === 'auth/email-already-in-use') {
           message = "An account with this email already exists.";
@@ -518,6 +553,21 @@
       } finally {
         btn.innerText = isSignUpMode ? "Create Account" : "Sign In";
         btn.disabled = false;
+      }
+    }
+
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+    async function handleGoogleSignIn() {
+      errorMsg.style.color = '#ef4444';
+      errorMsg.innerText = '';
+      try {
+        await auth.signInWithPopup(googleProvider);
+      } catch (err) {
+        if (err.code !== 'auth/popup-closed-by-user') {
+          errorMsg.innerText = "Google sign-in failed. Please try again.";
+          console.error(err);
+        }
       }
     }
 
@@ -532,10 +582,8 @@
 
       try {
         await auth.sendPasswordResetEmail(email);
-        errorMsg.style.color = '#10b981'; // green
+        errorMsg.style.color = '#10b981';
         errorMsg.innerText = `A password reset link has been sent to ${email}.`;
-        
-        // Reset back to red for future errors
         setTimeout(() => { errorMsg.style.color = '#ef4444'; }, 5000); 
       } catch (err) {
         errorMsg.innerText = "Error sending reset email. Please ensure the email is correct.";
