@@ -25,6 +25,8 @@
       --tag-angry: #ec4899;
       --tag-numb: #64748b;
       --tag-hopeful: #10b981;
+      --tag-happy: #facc15;
+      --tag-excited: #fb923c;
       --tag-unexplainable: #38bdf8;
     }
 
@@ -342,6 +344,8 @@
     .badge-angry { color: var(--tag-angry); background: rgba(236, 72, 153, 0.12); }
     .badge-numb { color: var(--tag-numb); background: rgba(100, 116, 139, 0.12); }
     .badge-hopeful { color: var(--tag-hopeful); background: rgba(16, 185, 129, 0.12); }
+    .badge-happy { color: var(--tag-happy); background: rgba(250, 204, 21, 0.12); }
+    .badge-excited { color: var(--tag-excited); background: rgba(251, 146, 60, 0.12); }
     .badge-cant-explain { color: var(--tag-unexplainable); background: rgba(56, 189, 248, 0.12); }
 
     .card-time {
@@ -624,6 +628,8 @@
           <label><input type="radio" name="emotion" value="Angry" class="emotion-radio"><span class="emotion-label">Angry</span></label>
           <label><input type="radio" name="emotion" value="Numb" class="emotion-radio"><span class="emotion-label">Numb</span></label>
           <label><input type="radio" name="emotion" value="Hopeful" class="emotion-radio"><span class="emotion-label">Hopeful</span></label>
+          <label><input type="radio" name="emotion" value="Happy" class="emotion-radio"><span class="emotion-label">Happy</span></label>
+          <label><input type="radio" name="emotion" value="Excited" class="emotion-radio"><span class="emotion-label">Excited</span></label>
           <label><input type="radio" name="emotion" value="Can't Explain" class="emotion-radio"><span class="emotion-label">I can't explain</span></label>
         </div>
         <button class="btn-post" id="postBtn" onclick="handlePostQuestion()">Release</button>
@@ -642,6 +648,8 @@
         <button class="filter-btn" onclick="setFilter('Angry', this)">Angry</button>
         <button class="filter-btn" onclick="setFilter('Numb', this)">Numb</button>
         <button class="filter-btn" onclick="setFilter('Hopeful', this)">Hopeful</button>
+        <button class="filter-btn" onclick="setFilter('Happy', this)">Happy</button>
+        <button class="filter-btn" onclick="setFilter('Excited', this)">Excited</button>
         <button class="filter-btn" onclick="setFilter('Can\'t Explain', this)">I can't explain</button>
       </div>
       <button class="scroll-btn" onclick="scrollFilters(150)" title="Scroll Right">&#10095;</button>
@@ -703,7 +711,6 @@
       return `${p1}-${p2}-${p3}`;
     }
 
-    // Strips spaces, forces lowercase, and encodes safely across devices
     function deriveIdFromKey(key) {
       const cleanKey = key.trim().toLowerCase();
       return 'usr_' + btoa(cleanKey).replace(/=/g, '');
