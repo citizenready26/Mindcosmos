@@ -693,7 +693,7 @@
       document.getElementById('filterBar').scrollBy({ left: amount, behavior: 'smooth' });
     }
 
-    // 2. Invisible Auth & Deterministic Sync Key Logic
+    // 2. Foolproof Deterministic Sync Key Logic
     const WORD_LIST = ["silent", "orbit", "cloud", "shadow", "spark", "echo", "harbor", "drift", "pulse", "depth", "light", "river"];
 
     function generateSyncKey() {
@@ -703,8 +703,10 @@
       return `${p1}-${p2}-${p3}`;
     }
 
+    // Strips spaces, forces lowercase, and encodes safely across devices
     function deriveIdFromKey(key) {
-      return 'usr_' + btoa(key).replace(/=/g, '').toLowerCase();
+      const cleanKey = key.trim().toLowerCase();
+      return 'usr_' + btoa(cleanKey).replace(/=/g, '');
     }
 
     let currentSyncKey = localStorage.getItem('inmind_sync_key');
@@ -755,6 +757,7 @@
         .limit(100)
         .onSnapshot(snapshot => {
           allQuestionsCache = [];
+          userInteractedQuestionIds.clear();
           
           let pendingFetches = snapshot.docs.length;
           if (pendingFetches === 0) {
@@ -763,12 +766,10 @@
           }
 
           snapshot.forEach(doc => {
-            const qData = doc.id;
             const item = doc.data();
             item.id = doc.id;
             allQuestionsCache.push(item);
 
-            // Check answers subcollection to see if user has interacted
             db.collection('questions').doc(doc.id).collection('answers')
               .where('authorId', '==', currentUserId)
               .get()
@@ -797,7 +798,6 @@
       let visibleCount = 0;
 
       allQuestionsCache.forEach(item => {
-        // My feed includes: Created by user OR user has replied to it
         if (currentFilter === 'MyFeed' && item.authorId !== currentUserId && !userInteractedQuestionIds.has(item.id)) return;
         if (currentFilter !== 'All' && currentFilter !== 'MyFeed' && item.emotion !== currentFilter) return;
 
@@ -853,7 +853,7 @@
       return div.innerHTML;
     }
 
-    // 6. Delete Question & Reply Handlers
+    // 6. Delete Handlers
     async function handleDeleteQuestion(qId) {
       if (!confirm("Are you sure you want to permanently delete this thought?")) return;
 
@@ -999,8 +999,13 @@
     }
 
     function handleRestoreKey() {
-      const key = document.getElementById('restoreKeyInput').value.trim().toLowerCase();
-      if (!key) return;
+      const rawInput = document.getElementById('restoreKeyInput').value;
+      const key = rawInput.trim().toLowerCase();
+      
+      if (!key) {
+        alert("Please type your 3-word Sync Key.");
+        return;
+      }
       
       localStorage.setItem('inmind_sync_key', key);
       currentSyncKey = key;
@@ -1008,9 +1013,10 @@
       localStorage.setItem('inmind_uid', currentUserId);
       
       document.getElementById('syncKeyDisplay').innerText = key;
+      document.getElementById('restoreKeyInput').value = '';
       closeSyncModal();
       
-      userInteractedQuestionIds.clear();
+      alert("Mind synced successfully!");
       listenToFeed();
     }
 
