@@ -564,6 +564,12 @@
       color: var(--text-muted);
       font-size: 0.9rem;
     }
+    /* Hide scroll arrows on mobile screens */
+    @media (max-width: 600px) {
+      .scroll-btn {
+        display: none;
+      }
+    }
   </style>
 
   <!-- Firebase Compat SDK -->
