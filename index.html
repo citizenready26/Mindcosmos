@@ -44,6 +44,143 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+
+    /* -----------------------------------
+       Welcome / Auth Screen (Gatekeeper)
+       ----------------------------------- */
+    #welcomeScreen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      width: 100%;
+      padding: 20px;
+      background: radial-gradient(circle at center, #11151f 0%, #090b10 100%);
+    }
+
+    .auth-card {
+      background: rgba(17, 21, 31, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+
+    .auth-brand-title {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .auth-brand-title .mind { color: #ffffff; }
+    .auth-brand-title .cosmos {
+      background: linear-gradient(180deg, #60a5fa 0%, #2563eb 50%, #1e3a8a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .auth-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    .auth-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .auth-inputs label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: -6px;
+    }
+
+    .auth-inputs input {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      padding: 14px 16px;
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .auth-inputs input:focus {
+      border-color: var(--border-focus);
+    }
+
+    .btn-main-auth {
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.1s, opacity 0.2s;
+      margin-bottom: 16px;
+    }
+
+    .btn-main-auth:hover {
+      opacity: 0.9;
+    }
+    .btn-main-auth:active {
+      transform: scale(0.98);
+    }
+
+    .auth-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .auth-link {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .auth-link:hover {
+      color: var(--text);
+    }
+
+    .auth-error {
+      color: #ef4444;
+      font-size: 0.8rem;
+      margin-bottom: 16px;
+      min-height: 20px;
+    }
+
+    /* -----------------------------------
+       Main Application (Hidden by Default)
+       ----------------------------------- */
+    #mainApp {
+      display: none; /* Controlled by JS */
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
       padding-bottom: 80px;
     }
 
@@ -84,35 +221,13 @@
       text-decoration: none;
     }
 
-    .brand-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      line-height: 1.1;
-    }
+    .brand-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; line-height: 1.1; }
+    .brand-title .mind { color: #ffffff; }
+    .brand-title .cosmos { background: linear-gradient(180deg, #60a5fa 0%, #2563eb 50%, #1e3a8a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .brand-subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .brand-subtitle span { color: #ffffff; font-weight: 600; }
 
-    .brand-title .mind {
-      color: #ffffff;
-    }
-
-    .brand-title .cosmos {
-      background: linear-gradient(180deg, #60a5fa 0%, #2563eb 50%, #1e3a8a 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .brand-subtitle {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-    
-    .brand-subtitle span {
-      color: #ffffff;
-      font-weight: 600;
-    }
-
-    .sync-badge {
+    .auth-badge {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -120,231 +235,50 @@
       color: var(--text-muted);
       background: var(--surface);
       border: 1px solid var(--border);
-      padding: 6px 12px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .sync-badge:hover {
-      border-color: var(--border-focus);
-      color: var(--text);
-    }
-
-    /* Composer Box */
-    .composer {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 24px;
-      transition: border-color 0.2s;
-    }
-
-    .composer:focus-within {
-      border-color: rgba(59, 130, 246, 0.5);
-    }
-
-    .composer textarea {
-      width: 100%;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text);
-      font-size: 0.98rem;
-      line-height: 1.5;
-      resize: none;
-      min-height: 72px;
-    }
-
-    .composer textarea::placeholder {
-      color: var(--text-muted);
-    }
-
-    .composer-footer {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding-top: 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    /* Scrollable Picker Row with Arrows */
-    .picker-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      width: 100%;
-    }
-
-    .emotion-picker {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      scroll-behavior: smooth;
-      flex: 1;
-      padding-bottom: 2px;
-    }
-
-    .emotion-picker::-webkit-scrollbar {
-      display: none;
-    }
-
-    .emotion-radio {
-      display: none;
-    }
-
-    .emotion-label {
-      font-size: 0.75rem;
-      font-weight: 500;
-      padding: 5px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s;
-    }
-
-    .emotion-radio:checked + .emotion-label {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text);
-      border-color: var(--text-muted);
-    }
-
-    .btn-post {
-      background: var(--text);
-      color: var(--bg);
-      border: none;
-      font-weight: 600;
-      font-size: 0.82rem;
-      padding: 8px 24px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      align-self: flex-end;
-    }
-
-    .btn-post:hover {
-      opacity: 0.9;
-    }
-
-    .btn-post:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    /* Emotion Filter Bar with Arrows */
-    .filter-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      width: 100%;
-      margin-bottom: 16px;
-    }
-
-    .scroll-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.2rem;
-      cursor: pointer;
-      padding: 0 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.15s;
-    }
-
-    .scroll-btn:hover {
-      color: var(--text);
-    }
-
-    @media (max-width: 600px) {
-      .scroll-btn {
-        display: none;
-      }
-    }
-
-    .filter-bar {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      scroll-behavior: smooth;
-      flex: 1;
-      padding-bottom: 2px;
-    }
-
-    .filter-bar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .filter-btn {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 0.78rem;
-      font-weight: 500;
       padding: 6px 14px;
       border-radius: 999px;
       cursor: pointer;
-      white-space: nowrap;
       transition: all 0.2s ease;
     }
+    .auth-badge:hover { border-color: var(--border-focus); color: var(--text); }
 
-    .filter-btn:hover {
-      color: var(--text);
-      border-color: var(--text-muted);
-    }
+    /* Composer Box */
+    .composer { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 24px; transition: border-color 0.2s; }
+    .composer:focus-within { border-color: rgba(59, 130, 246, 0.5); }
+    .composer textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-size: 0.98rem; line-height: 1.5; resize: none; min-height: 72px; }
+    .composer textarea::placeholder { color: var(--text-muted); }
+    .composer-footer { display: flex; flex-direction: column; gap: 12px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.05); }
 
-    .filter-btn.active {
-      background: var(--surface);
-      color: var(--text);
-      border-color: var(--border-focus);
-    }
+    /* Pickers & Filters */
+    .picker-wrapper, .filter-wrapper { display: flex; align-items: center; gap: 4px; width: 100%; }
+    .filter-wrapper { margin-bottom: 16px; }
+    .scroll-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; padding: 0 4px; display: flex; align-items: center; justify-content: center; transition: color 0.15s; }
+    .scroll-btn:hover { color: var(--text); }
+    @media (max-width: 600px) { .scroll-btn { display: none; } }
+    
+    .emotion-picker, .filter-bar { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; scroll-behavior: smooth; flex: 1; padding-bottom: 2px; }
+    .emotion-picker::-webkit-scrollbar, .filter-bar::-webkit-scrollbar { display: none; }
+    .emotion-radio { display: none; }
+    
+    .emotion-label { font-size: 0.75rem; font-weight: 500; padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+    .emotion-radio:checked + .emotion-label { background: rgba(255, 255, 255, 0.08); color: var(--text); border-color: var(--text-muted); }
 
-    .filter-btn.special-filter {
-      border-style: dashed;
-    }
+    .filter-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-size: 0.78rem; font-weight: 500; padding: 6px 14px; border-radius: 999px; cursor: pointer; white-space: nowrap; transition: all 0.2s ease; }
+    .filter-btn:hover { color: var(--text); border-color: var(--text-muted); }
+    .filter-btn.active { background: var(--surface); color: var(--text); border-color: var(--border-focus); }
+    .filter-btn.special-filter { border-style: dashed; }
+
+    .btn-post { background: var(--text); color: var(--bg); border: none; font-weight: 600; font-size: 0.82rem; padding: 8px 24px; border-radius: 999px; cursor: pointer; transition: opacity 0.2s; align-self: flex-end; }
+    .btn-post:hover { opacity: 0.9; }
+    .btn-post:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* Feed & Cards */
-    .feed {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 18px;
-      transition: background 0.15s, border-color 0.15s;
-    }
-
-    .card:hover {
-      border-color: rgba(255, 255, 255, 0.12);
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-
-    .badge {
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.05);
-    }
-
+    .feed { display: flex; flex-direction: column; gap: 14px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; transition: background 0.15s, border-color 0.15s; }
+    .card:hover { border-color: rgba(255, 255, 255, 0.12); }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    
+    .badge { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.05); }
     .badge-happy { color: var(--tag-happy); background: rgba(250, 204, 21, 0.12); }
     .badge-excited { color: var(--tag-excited); background: rgba(251, 146, 60, 0.12); }
     .badge-anxious { color: var(--tag-anxious); background: rgba(245, 158, 11, 0.12); }
@@ -355,346 +289,137 @@
     .badge-hopeful { color: var(--tag-hopeful); background: rgba(16, 185, 129, 0.12); }
     .badge-cant-explain { color: var(--tag-unexplainable); background: rgba(56, 189, 248, 0.12); }
 
-    .card-time {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .card-question {
-      font-size: 0.96rem;
-      line-height: 1.5;
-      color: var(--text);
-      margin-bottom: 14px;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .card-actions {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-top: 1px solid rgba(255, 255, 255, 0.04);
-      padding-top: 12px;
-    }
-
-    .btn-toggle-replies {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 0.78rem;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: color 0.15s;
-    }
-
-    .btn-toggle-replies:hover {
-      color: var(--text);
-    }
-
-    .btn-delete-card {
-      background: transparent;
-      border: none;
-      font-size: 1.05rem;
-      cursor: pointer;
-      opacity: 0.5;
-      transition: opacity 0.15s, transform 0.15s;
-    }
-
-    .btn-delete-card:hover {
-      opacity: 1;
-      transform: scale(1.1);
-    }
+    .card-time { font-size: 0.75rem; color: var(--text-muted); }
+    .card-question { font-size: 0.96rem; line-height: 1.5; color: var(--text); margin-bottom: 14px; white-space: pre-wrap; word-break: break-word; }
+    .card-actions { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255, 255, 255, 0.04); padding-top: 12px; }
+    .btn-toggle-replies { background: transparent; border: none; color: var(--text-muted); font-size: 0.78rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: color 0.15s; }
+    .btn-toggle-replies:hover { color: var(--text); }
+    .btn-delete-card { background: transparent; border: none; font-size: 1.05rem; cursor: pointer; opacity: 0.5; transition: opacity 0.15s, transform 0.15s; }
+    .btn-delete-card:hover { opacity: 1; transform: scale(1.1); }
 
     /* Accordion Replies */
-    .replies-section {
-      display: none;
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px dashed var(--border);
-    }
+    .replies-section { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); }
+    .replies-section.open { display: block; }
+    .replies-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .reply-bubble { background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.04); padding: 10px 14px; border-radius: 10px; font-size: 0.86rem; line-height: 1.45; color: #cbd5e1; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .reply-content { flex: 1; }
+    .reply-time { font-size: 0.68rem; color: var(--text-muted); margin-top: 4px; }
+    .btn-delete-reply { background: transparent; border: none; font-size: 0.85rem; cursor: pointer; opacity: 0.4; transition: opacity 0.15s; }
+    .btn-delete-reply:hover { opacity: 1; }
+    
+    .reply-input-box { display: flex; gap: 8px; }
+    .reply-input-box input { flex: 1; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: 0.84rem; outline: none; }
+    .reply-input-box input:focus { border-color: var(--border-focus); }
+    .btn-submit-reply { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text); font-size: 0.78rem; font-weight: 600; padding: 0 14px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+    .btn-submit-reply:hover { background: var(--border); }
 
-    .replies-section.open {
-      display: block;
-    }
-
-    .replies-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .reply-bubble {
-      background: rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 0.86rem;
-      line-height: 1.45;
-      color: #cbd5e1;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-    }
-
-    .reply-content {
-      flex: 1;
-    }
-
-    .reply-time {
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    .btn-delete-reply {
-      background: transparent;
-      border: none;
-      font-size: 0.85rem;
-      cursor: pointer;
-      opacity: 0.4;
-      transition: opacity 0.15s;
-    }
-
-    .btn-delete-reply:hover {
-      opacity: 1;
-    }
-
-    .reply-input-box {
-      display: flex;
-      gap: 8px;
-    }
-
-    .reply-input-box input {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: var(--text);
-      font-size: 0.84rem;
-      outline: none;
-    }
-
-    .reply-input-box input:focus {
-      border-color: var(--border-focus);
-    }
-
-    .btn-submit-reply {
-      background: var(--surface-hover);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 0 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-
-    .btn-submit-reply:hover {
-      background: var(--border);
-    }
-
-    /* Modal for Sync Key */
-    .modal-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    .modal-backdrop.open {
-      display: flex;
-    }
-
-    .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      width: 100%;
-      max-width: 440px;
-      padding: 24px;
-    }
-
-    .modal h3 {
-      font-size: 1.1rem;
-      margin-bottom: 8px;
-    }
-
-    .modal p {
-      font-size: 0.84rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 18px;
-    }
-
-    .sync-key-display {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--border);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-family: monospace;
-      font-size: 0.95rem;
-      color: var(--accent);
-      user-select: all;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .modal-inputs {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .modal-inputs input {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border);
-      padding: 10px 12px;
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 0.84rem;
-      outline: none;
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    .btn-close {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 0.82rem;
-      cursor: pointer;
-    }
-
-    .btn-restore {
-      background: var(--accent);
-      border: none;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 48px 16px;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
+    .empty-state { text-align: center; padding: 48px 16px; color: var(--text-muted); font-size: 0.9rem; }
   </style>
 
-  <!-- Firebase Compat SDK -->
+  <!-- Firebase Compat SDKs (App, Auth, Firestore) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-  <!-- Sticky Header -->
-  <header>
-    <div class="header-inner">
-      <a href="#" class="brand">
-        <div class="brand-title"><span class="mind">Mind</span><span class="cosmos">Cosmos</span></div>
-        <div class="brand-subtitle">by <span>inMind</span></div>
-      </a>
-      <div class="sync-badge" onclick="openSyncModal()">
-        <span>🔑 Sync Key</span>
+  <!-- ==============================================
+       GATEKEEPER: WELCOME & AUTH SCREEN
+       ============================================== -->
+  <div id="welcomeScreen">
+    <div class="auth-card">
+      <div class="auth-brand-title"><span class="mind">Mind</span><span class="cosmos">Cosmos</span></div>
+      <p class="auth-subtitle" id="authSubtitle">A safe space to cast your thoughts into the universe. Sign in to continue.</p>
+
+      <div class="auth-error" id="authErrorMessage"></div>
+
+      <div class="auth-inputs">
+        <label for="authEmail">Email</label>
+        <input type="email" id="authEmail" placeholder="you@example.com">
+        
+        <label for="authPassword">Password</label>
+        <input type="password" id="authPassword" placeholder="••••••••">
+      </div>
+
+      <button class="btn-main-auth" id="authSubmitBtn" onclick="handleAuthSubmit()">Sign In</button>
+
+      <div class="auth-links">
+        <button class="auth-link" id="forgotPasswordBtn" onclick="handleForgotPassword()">Forgot password?</button>
+        <button class="auth-link" id="authToggleBtn" onclick="toggleAuthMode()">Need an account? <strong>Sign Up</strong></button>
       </div>
     </div>
-  </header>
-
-  <div class="app-container">
-
-    <!-- Composer -->
-    <div class="composer">
-      <textarea id="questionInput" placeholder="What thought or feeling is in your mind right now?" maxlength="320"></textarea>
-      <div class="composer-footer">
-        <div class="picker-wrapper">
-          <button class="scroll-btn" onclick="scrollPicker(-150)" title="Scroll Left">&#10094;</button>
-          <div class="emotion-picker" id="emotionPicker">
-            <label><input type="radio" name="emotion" value="Happy" class="emotion-radio" checked><span class="emotion-label">Happy</span></label>
-            <label><input type="radio" name="emotion" value="Excited" class="emotion-radio"><span class="emotion-label">Excited</span></label>
-            <label><input type="radio" name="emotion" value="Anxious" class="emotion-radio"><span class="emotion-label">Anxious</span></label>
-            <label><input type="radio" name="emotion" value="Overwhelmed" class="emotion-radio"><span class="emotion-label">Overwhelmed</span></label>
-            <label><input type="radio" name="emotion" value="Lost" class="emotion-radio"><span class="emotion-label">Lost</span></label>
-            <label><input type="radio" name="emotion" value="Angry" class="emotion-radio"><span class="emotion-label">Angry</span></label>
-            <label><input type="radio" name="emotion" value="Numb" class="emotion-radio"><span class="emotion-label">Numb</span></label>
-            <label><input type="radio" name="emotion" value="Hopeful" class="emotion-radio"><span class="emotion-label">Hopeful</span></label>
-            <label><input type="radio" name="emotion" value="Can't Explain" class="emotion-radio"><span class="emotion-label">I can't explain</span></label>
-          </div>
-          <button class="scroll-btn" onclick="scrollPicker(150)" title="Scroll Right">&#10095;</button>
-        </div>
-        <button class="btn-post" id="postBtn" onclick="handlePostQuestion()">Release</button>
-      </div>
-    </div>
-
-    <!-- Emotion Filter Bar with Arrows -->
-    <div class="filter-wrapper">
-      <button class="scroll-btn" onclick="scrollFilters(-150)" title="Scroll Left">&#10094;</button>
-      <div class="filter-bar" id="filterBar">
-        <button class="filter-btn active" onclick="setFilter('All', this)">All Feeds</button>
-        <button class="filter-btn special-filter" onclick="setFilter('MyFeed', this)">My feed</button>
-        <button class="filter-btn" onclick="setFilter('Happy', this)">Happy</button>
-        <button class="filter-btn" onclick="setFilter('Excited', this)">Excited</button>
-        <button class="filter-btn" onclick="setFilter('Anxious', this)">Anxious</button>
-        <button class="filter-btn" onclick="setFilter('Overwhelmed', this)">Overwhelmed</button>
-        <button class="filter-btn" onclick="setFilter('Lost', this)">Lost</button>
-        <button class="filter-btn" onclick="setFilter('Angry', this)">Angry</button>
-        <button class="filter-btn" onclick="setFilter('Numb', this)">Numb</button>
-        <button class="filter-btn" onclick="setFilter('Hopeful', this)">Hopeful</button>
-        <button class="filter-btn" onclick="setFilter('Can\'t Explain', this)">I can't explain</button>
-      </div>
-      <button class="scroll-btn" onclick="scrollFilters(150)" title="Scroll Right">&#10095;</button>
-    </div>
-
-    <!-- Feed Container -->
-    <div class="feed" id="feedContainer">
-      <div class="empty-state">Loading thoughts...</div>
-    </div>
-
   </div>
 
-  <!-- Sync Key Modal -->
-  <div class="modal-backdrop" id="syncModal">
-    <div class="modal">
-      <h3>Invisible Identity</h3>
-      <p>Your session is stored locally. Save this 3-word Sync Key to access your question history on any other browser or device.</p>
-      
-      <div class="sync-key-display" id="syncKeyDisplay">...</div>
+  <!-- ==============================================
+       MAIN APPLICATION (Hidden until authenticated)
+       ============================================== -->
+  <div id="mainApp">
+    
+    <!-- Sticky Header -->
+    <header>
+      <div class="header-inner">
+        <div class="brand">
+          <div class="brand-title"><span class="mind">Mind</span><span class="cosmos">Cosmos</span></div>
+          <div class="brand-subtitle">by <span>inMind</span></div>
+        </div>
+        <div class="auth-badge" onclick="handleSignOut()" id="authBadgeText">
+          <span>👤 Sign Out</span>
+        </div>
+      </div>
+    </header>
 
-      <div class="modal-inputs">
-        <label style="font-size:0.75rem; color:var(--text-muted)">Have an existing Sync Key?</label>
-        <input type="text" id="restoreKeyInput" placeholder="word-word-word">
+    <div class="app-container">
+      <!-- Composer -->
+      <div class="composer">
+        <textarea id="questionInput" placeholder="What thought or feeling is in your mind right now?" maxlength="320"></textarea>
+        <div class="composer-footer">
+          <div class="picker-wrapper">
+            <button class="scroll-btn" onclick="scrollPicker(-150)" title="Scroll Left">&#10094;</button>
+            <div class="emotion-picker" id="emotionPicker">
+              <label><input type="radio" name="emotion" value="Happy" class="emotion-radio" checked><span class="emotion-label">Happy</span></label>
+              <label><input type="radio" name="emotion" value="Excited" class="emotion-radio"><span class="emotion-label">Excited</span></label>
+              <label><input type="radio" name="emotion" value="Anxious" class="emotion-radio"><span class="emotion-label">Anxious</span></label>
+              <label><input type="radio" name="emotion" value="Overwhelmed" class="emotion-radio"><span class="emotion-label">Overwhelmed</span></label>
+              <label><input type="radio" name="emotion" value="Lost" class="emotion-radio"><span class="emotion-label">Lost</span></label>
+              <label><input type="radio" name="emotion" value="Angry" class="emotion-radio"><span class="emotion-label">Angry</span></label>
+              <label><input type="radio" name="emotion" value="Numb" class="emotion-radio"><span class="emotion-label">Numb</span></label>
+              <label><input type="radio" name="emotion" value="Hopeful" class="emotion-radio"><span class="emotion-label">Hopeful</span></label>
+              <label><input type="radio" name="emotion" value="Can't Explain" class="emotion-radio"><span class="emotion-label">I can't explain</span></label>
+            </div>
+            <button class="scroll-btn" onclick="scrollPicker(150)" title="Scroll Right">&#10095;</button>
+          </div>
+          <button class="btn-post" id="postBtn" onclick="handlePostQuestion()">Release</button>
+        </div>
       </div>
 
-      <div class="modal-actions">
-        <button class="btn-close" onclick="closeSyncModal()">Close</button>
-        <button class="btn-restore" onclick="handleRestoreKey()">Restore Mind</button>
+      <!-- Emotion Filter Bar -->
+      <div class="filter-wrapper">
+        <button class="scroll-btn" onclick="scrollFilters(-150)" title="Scroll Left">&#10094;</button>
+        <div class="filter-bar" id="filterBar">
+          <button class="filter-btn active" onclick="setFilter('All', this)">All Feeds</button>
+          <button class="filter-btn special-filter" onclick="setFilter('MyFeed', this)">My feed</button>
+          <button class="filter-btn" onclick="setFilter('Happy', this)">Happy</button>
+          <button class="filter-btn" onclick="setFilter('Excited', this)">Excited</button>
+          <button class="filter-btn" onclick="setFilter('Anxious', this)">Anxious</button>
+          <button class="filter-btn" onclick="setFilter('Overwhelmed', this)">Overwhelmed</button>
+          <button class="filter-btn" onclick="setFilter('Lost', this)">Lost</button>
+          <button class="filter-btn" onclick="setFilter('Angry', this)">Angry</button>
+          <button class="filter-btn" onclick="setFilter('Numb', this)">Numb</button>
+          <button class="filter-btn" onclick="setFilter('Hopeful', this)">Hopeful</button>
+          <button class="filter-btn" onclick="setFilter('Can\'t Explain', this)">I can't explain</button>
+        </div>
+        <button class="scroll-btn" onclick="scrollFilters(150)" title="Scroll Right">&#10095;</button>
+      </div>
+
+      <!-- Feed Container -->
+      <div class="feed" id="feedContainer">
+        <div class="empty-state">Loading thoughts...</div>
       </div>
     </div>
   </div>
 
   <script>
-    // 1. Firebase Initialization
+    // 1. Firebase Initialization (Replace with your actual config if needed)
     const firebaseConfig = {
       apiKey: "AIzaSyC_jtZZWz6h9qMAZa7nsNX-pdzt6qjyIno",
       authDomain: "inmind-8e8fb.firebaseapp.com",
@@ -706,50 +431,131 @@
     };
 
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.firestore();
 
-    function scrollFilters(amount) {
-      document.getElementById('filterBar').scrollBy({ left: amount, behavior: 'smooth' });
+    // 2. DOM Elements & State
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const mainApp = document.getElementById('mainApp');
+    const errorMsg = document.getElementById('authErrorMessage');
+    
+    let currentUserId = null;
+    let isSignUpMode = false;
+
+    // 3. Auth State Observer (The Gatekeeper)
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        // User is logged in: Hide Auth, Show App
+        currentUserId = user.uid;
+        welcomeScreen.style.display = 'none';
+        mainApp.style.display = 'flex';
+        
+        // Update header badge with email prefix
+        const emailPrefix = user.email.split('@')[0];
+        document.getElementById('authBadgeText').innerHTML = `<span>👤 ${emailPrefix} (Sign Out)</span>`;
+        
+        listenToFeed(); // Load the data
+      } else {
+        // User is logged out: Show Auth, Hide App
+        currentUserId = null;
+        welcomeScreen.style.display = 'flex';
+        mainApp.style.display = 'none';
+        
+        // Clean up feed listeners if they exist
+        if (unsubscribeFeed) {
+          unsubscribeFeed();
+          unsubscribeFeed = null;
+        }
+      }
+    });
+
+    // 4. Authentication Functions
+    function toggleAuthMode() {
+      isSignUpMode = !isSignUpMode;
+      errorMsg.innerText = '';
+      
+      const title = isSignUpMode ? "Join the Universe" : "A safe space to cast your thoughts into the universe. Sign in to continue.";
+      document.getElementById('authSubtitle').innerText = title;
+      document.getElementById('authSubmitBtn').innerText = isSignUpMode ? "Create Account" : "Sign In";
+      document.getElementById('authToggleBtn').innerHTML = isSignUpMode ? "Already have an account? <strong>Sign In</strong>" : "Need an account? <strong>Sign Up</strong>";
+      
+      // Hide forgot password on sign up mode
+      document.getElementById('forgotPasswordBtn').style.display = isSignUpMode ? 'none' : 'block';
     }
 
-    function scrollPicker(amount) {
-      document.getElementById('emotionPicker').scrollBy({ left: amount, behavior: 'smooth' });
+    async function handleAuthSubmit() {
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value.trim();
+      errorMsg.innerText = '';
+
+      if (!email || !password) {
+        errorMsg.innerText = "Please enter both email and password.";
+        return;
+      }
+
+      const btn = document.getElementById('authSubmitBtn');
+      btn.innerText = "Please wait...";
+      btn.disabled = true;
+
+      try {
+        if (isSignUpMode) {
+          await auth.createUserWithEmailAndPassword(email, password);
+        } else {
+          await auth.signInWithEmailAndPassword(email, password);
+        }
+        // Success handled by onAuthStateChanged
+      } catch (err) {
+        // Clean up Firebase error messages for the user
+        let message = err.message;
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+          message = "Invalid email or password.";
+        } else if (err.code === 'auth/email-already-in-use') {
+          message = "An account with this email already exists.";
+        } else if (err.code === 'auth/weak-password') {
+          message = "Password should be at least 6 characters.";
+        }
+        errorMsg.innerText = message;
+      } finally {
+        btn.innerText = isSignUpMode ? "Create Account" : "Sign In";
+        btn.disabled = false;
+      }
     }
 
-    // 2. 3-Word Sync Key Generator & Derivation
-    const WORD_LIST = ["silent", "orbit", "cloud", "shadow", "spark", "echo", "harbor", "drift", "pulse", "depth", "light", "river", "frost", "stellar", "cosmos", "nova"];
+    async function handleForgotPassword() {
+      const email = document.getElementById('authEmail').value.trim();
+      errorMsg.innerText = '';
 
-    function generateSyncKey() {
-      const p1 = WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
-      const p2 = WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
-      const p3 = WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
-      return `${p1}-${p2}-${p3}`;
+      if (!email) {
+        errorMsg.innerText = "Please enter your email address first to reset your password.";
+        return;
+      }
+
+      try {
+        await auth.sendPasswordResetEmail(email);
+        errorMsg.style.color = '#10b981'; // green
+        errorMsg.innerText = `A password reset link has been sent to ${email}.`;
+        
+        // Reset back to red for future errors
+        setTimeout(() => { errorMsg.style.color = '#ef4444'; }, 5000); 
+      } catch (err) {
+        errorMsg.innerText = "Error sending reset email. Please ensure the email is correct.";
+      }
     }
 
-    function deriveIdFromKey(key) {
-      const cleanKey = key.trim().toLowerCase();
-      return 'usr_' + btoa(cleanKey).replace(/=/g, '');
+    function handleSignOut() {
+      if (confirm("Are you sure you want to sign out?")) {
+        auth.signOut();
+      }
     }
 
-    let currentSyncKey = localStorage.getItem('inmind_sync_key');
-    let currentUserId = localStorage.getItem('inmind_uid');
+    // 5. App Functionality (Feed, Posting, Filtering)
+    function scrollFilters(amount) { document.getElementById('filterBar').scrollBy({ left: amount, behavior: 'smooth' }); }
+    function scrollPicker(amount) { document.getElementById('emotionPicker').scrollBy({ left: amount, behavior: 'smooth' }); }
 
-    if (!currentSyncKey) {
-      currentSyncKey = generateSyncKey();
-      currentUserId = deriveIdFromKey(currentSyncKey);
-      localStorage.setItem('inmind_sync_key', currentSyncKey);
-      localStorage.setItem('inmind_uid', currentUserId);
-    } else {
-      currentUserId = deriveIdFromKey(currentSyncKey);
-      localStorage.setItem('inmind_uid', currentUserId);
-    }
-
-    document.getElementById('syncKeyDisplay').innerText = currentSyncKey;
-
-    // 3. State & Filtering
     let currentFilter = 'All';
     let allQuestionsCache = [];
     let userInteractedQuestionIds = new Set();
+    let unsubscribeFeed = null;
 
     function setFilter(filterType, element) {
       currentFilter = filterType;
@@ -766,15 +572,14 @@
       if (minutes < 60) return `${minutes}m ago`;
       const hours = Math.floor(minutes / 60);
       if (hours < 24) return `${hours}h ago`;
-      const days = Math.floor(hours / 24);
-      return `${days}d ago`;
+      return `${Math.floor(hours / 24)}d ago`;
     }
 
-    // 4. Real-time Feed Listener with Interaction Tracking
     function listenToFeed() {
       const feedContainer = document.getElementById('feedContainer');
-      
-      db.collection('questions')
+      if (unsubscribeFeed) unsubscribeFeed();
+
+      unsubscribeFeed = db.collection('questions')
         .orderBy('createdAt', 'desc')
         .limit(100)
         .onSnapshot(snapshot => {
@@ -782,10 +587,7 @@
           userInteractedQuestionIds.clear();
           
           let pendingFetches = snapshot.docs.length;
-          if (pendingFetches === 0) {
-            renderFeed();
-            return;
-          }
+          if (pendingFetches === 0) { renderFeed(); return; }
 
           snapshot.forEach(doc => {
             const item = doc.data();
@@ -795,22 +597,16 @@
             db.collection('questions').doc(doc.id).collection('answers')
               .where('authorId', '==', currentUserId)
               .get()
-              .then(ansSnap => {
-                if (!ansSnap.empty) {
-                  userInteractedQuestionIds.add(doc.id);
-                }
-              })
-              .catch(err => console.error("Error fetching user replies:", err))
+              .then(ansSnap => { if (!ansSnap.empty) userInteractedQuestionIds.add(doc.id); })
+              .catch(err => console.error(err))
               .finally(() => {
                 pendingFetches--;
-                if (pendingFetches === 0) {
-                  renderFeed();
-                }
+                if (pendingFetches === 0) renderFeed();
               });
           });
         }, err => {
-          console.error("Firestore feed error:", err);
-          feedContainer.innerHTML = `<div class="empty-state">Unable to load feed. Check Firestore Security Rules.</div>`;
+          console.error(err);
+          feedContainer.innerHTML = `<div class="empty-state">Unable to load feed. Check Firestore Rules.</div>`;
         });
     }
 
@@ -824,21 +620,17 @@
         if (currentFilter !== 'All' && currentFilter !== 'MyFeed' && item.emotion !== currentFilter) return;
 
         visibleCount++;
-        const card = createCardElement(item);
-        feedContainer.appendChild(card);
+        feedContainer.appendChild(createCardElement(item));
       });
 
       if (visibleCount === 0) {
-        feedContainer.innerHTML = `<div class="empty-state">${currentFilter === 'MyFeed' ? "Your feed is empty. Release a thought or answer someone to see it here." : "No thoughts found in this space yet."}</div>`;
+        feedContainer.innerHTML = `<div class="empty-state">${currentFilter === 'MyFeed' ? "Your feed is empty. Release a thought or answer someone." : "No thoughts found in this space yet."}</div>`;
       }
     }
 
-    // 5. Card UI Rendering & Accordion Replies
     function createCardElement(data) {
       const card = document.createElement('div');
       card.className = 'card';
-      card.id = `card-${data.id}`;
-
       const dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
       const rawEmotion = data.emotion || 'lost';
       const emotionClass = `badge-${rawEmotion.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
@@ -851,15 +643,11 @@
         </div>
         <div class="card-question">${escapeHtml(data.text)}</div>
         <div class="card-actions">
-          <button class="btn-toggle-replies" onclick="toggleReplies('${data.id}')">
-            💬 <span id="reply-count-${data.id}">${data.replyCount || 0}</span> answers
-          </button>
+          <button class="btn-toggle-replies" onclick="toggleReplies('${data.id}')">💬 <span id="reply-count-${data.id}">${data.replyCount || 0}</span> answers</button>
           ${isOwner ? `<button class="btn-delete-card" onclick="handleDeleteQuestion('${data.id}')" title="Delete thought">🗑️</button>` : ''}
         </div>
         <div class="replies-section" id="replies-${data.id}">
-          <div class="replies-list" id="replies-list-${data.id}">
-            <div style="font-size:0.75rem; color:var(--text-muted);">Loading answers...</div>
-          </div>
+          <div class="replies-list" id="replies-list-${data.id}"><div style="font-size:0.75rem; color:var(--text-muted);">Loading...</div></div>
           <div class="reply-input-box">
             <input type="text" id="input-${data.id}" placeholder="Provide clarity or comfort..." maxlength="200" onkeydown="if(event.key==='Enter') submitReply('${data.id}')">
             <button class="btn-submit-reply" onclick="submitReply('${data.id}')">Answer</button>
@@ -875,48 +663,28 @@
       return div.innerHTML;
     }
 
-    // 6. Delete Handlers
     async function handleDeleteQuestion(qId) {
-      if (!confirm("Are you sure you want to permanently delete this thought?")) return;
-
-      try {
-        await db.collection('questions').doc(qId).delete();
-      } catch (err) {
-        console.error("Error deleting post:", err);
-        alert("Failed to delete. Make sure delete permissions are enabled in Firebase rules.");
-      }
+      if (!confirm("Delete this thought?")) return;
+      try { await db.collection('questions').doc(qId).delete(); } catch (err) { alert("Failed to delete."); }
     }
 
     async function handleDeleteReply(qId, ansId) {
       if (!confirm("Delete your answer?")) return;
-
       try {
         const qRef = db.collection('questions').doc(qId);
         await qRef.collection('answers').doc(ansId).delete();
-        await qRef.update({
-          replyCount: firebase.firestore.FieldValue.increment(-1)
-        });
+        await qRef.update({ replyCount: firebase.firestore.FieldValue.increment(-1) });
         userInteractedQuestionIds.delete(qId);
         renderFeed();
-      } catch (err) {
-        console.error("Error deleting answer:", err);
-        alert("Failed to delete answer.");
-      }
+      } catch (err) { alert("Failed to delete answer."); }
     }
 
-    // 7. Reply Toggle & Subcollection Loader
     const activeReplyListeners = {};
-
     function toggleReplies(qId) {
       const section = document.getElementById(`replies-${qId}`);
-      const isOpen = section.classList.contains('open');
-
-      if (isOpen) {
+      if (section.classList.contains('open')) {
         section.classList.remove('open');
-        if (activeReplyListeners[qId]) {
-          activeReplyListeners[qId]();
-          delete activeReplyListeners[qId];
-        }
+        if (activeReplyListeners[qId]) { activeReplyListeners[qId](); delete activeReplyListeners[qId]; }
       } else {
         section.classList.add('open');
         loadReplies(qId);
@@ -924,129 +692,58 @@
     }
 
     function loadReplies(qId) {
-      const listContainer = document.getElementById(`replies-list-${qId}`);
-      
+      const list = document.getElementById(`replies-list-${qId}`);
       activeReplyListeners[qId] = db.collection('questions').doc(qId).collection('answers')
-        .orderBy('createdAt', 'asc')
-        .onSnapshot(snap => {
-          if (snap.empty) {
-            listContainer.innerHTML = `<div style="font-size:0.75rem; color:var(--text-muted);">No answers yet. Be the first to reply.</div>`;
-            return;
-          }
-          listContainer.innerHTML = '';
+        .orderBy('createdAt', 'asc').onSnapshot(snap => {
+          if (snap.empty) { list.innerHTML = `<div style="font-size:0.75rem; color:var(--text-muted);">No answers yet.</div>`; return; }
+          list.innerHTML = '';
           snap.forEach(doc => {
             const reply = doc.data();
-            const ansId = doc.id;
             const dateObj = reply.createdAt ? reply.createdAt.toDate() : new Date();
-            const isReplyOwner = reply.authorId === currentUserId;
-
-            const replyEl = document.createElement('div');
-            replyEl.className = 'reply-bubble';
-            replyEl.innerHTML = `
-              <div class="reply-content">
-                <div>${escapeHtml(reply.text)}</div>
-                <div class="reply-time">${timeAgo(dateObj)}</div>
-              </div>
-              ${isReplyOwner ? `<button class="btn-delete-reply" onclick="handleDeleteReply('${qId}', '${ansId}')" title="Delete answer">🗑️</button>` : ''}
+            const el = document.createElement('div');
+            el.className = 'reply-bubble';
+            el.innerHTML = `
+              <div class="reply-content"><div>${escapeHtml(reply.text)}</div><div class="reply-time">${timeAgo(dateObj)}</div></div>
+              ${reply.authorId === currentUserId ? `<button class="btn-delete-reply" onclick="handleDeleteReply('${qId}', '${doc.id}')">🗑️</button>` : ''}
             `;
-            listContainer.appendChild(replyEl);
+            list.appendChild(el);
           });
         });
     }
 
-    // 8. Post Question
     async function handlePostQuestion() {
       const input = document.getElementById('questionInput');
       const text = input.value.trim();
-      const emotionRadio = document.querySelector('input[name="emotion"]:checked');
-      const emotion = emotionRadio ? emotionRadio.value : 'Happy';
+      const emotion = document.querySelector('input[name="emotion"]:checked')?.value || 'Happy';
       const postBtn = document.getElementById('postBtn');
 
       if (!text) return;
-
-      postBtn.disabled = true;
-      postBtn.innerText = 'Releasing...';
+      postBtn.disabled = true; postBtn.innerText = 'Releasing...';
 
       try {
         await db.collection('questions').add({
-          text: text,
-          emotion: emotion,
-          authorId: currentUserId,
-          replyCount: 0,
+          text: text, emotion: emotion, authorId: currentUserId, replyCount: 0,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-
         input.value = '';
-      } catch (err) {
-        console.error("Error creating post:", err);
-        alert("Failed to submit. Please check Firestore Rules.");
-      } finally {
-        postBtn.disabled = false;
-        postBtn.innerText = 'Release';
-      }
+      } catch (err) { alert("Failed to submit."); }
+      finally { postBtn.disabled = false; postBtn.innerText = 'Release'; }
     }
 
-    // 9. Submit Reply
     async function submitReply(qId) {
       const input = document.getElementById(`input-${qId}`);
       const text = input.value.trim();
       if (!text) return;
-
       input.value = '';
 
       try {
         const qRef = db.collection('questions').doc(qId);
-        
-        await db.collection('questions').doc(qId).collection('answers').add({
-          text: text,
-          authorId: currentUserId,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        await qRef.update({
-          replyCount: firebase.firestore.FieldValue.increment(1)
-        });
-
+        await qRef.collection('answers').add({ text: text, authorId: currentUserId, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        await qRef.update({ replyCount: firebase.firestore.FieldValue.increment(1) });
         userInteractedQuestionIds.add(qId);
         renderFeed();
-      } catch (err) {
-        console.error("Error submitting answer:", err);
-      }
+      } catch (err) { console.error(err); }
     }
-
-    // 10. Sync Key Modal Functions
-    function openSyncModal() {
-      document.getElementById('syncModal').classList.add('open');
-    }
-
-    function closeSyncModal() {
-      document.getElementById('syncModal').classList.remove('open');
-    }
-
-    function handleRestoreKey() {
-      const rawInput = document.getElementById('restoreKeyInput').value;
-      const key = rawInput.trim().toLowerCase();
-      
-      if (!key) {
-        alert("Please type your 3-word Sync Key.");
-        return;
-      }
-      
-      localStorage.setItem('inmind_sync_key', key);
-      currentSyncKey = key;
-      currentUserId = deriveIdFromKey(key);
-      localStorage.setItem('inmind_uid', currentUserId);
-      
-      document.getElementById('syncKeyDisplay').innerText = key;
-      document.getElementById('restoreKeyInput').value = '';
-      closeSyncModal();
-      
-      alert("Mind synced successfully!");
-      listenToFeed();
-    }
-
-    // Initial Load
-    listenToFeed();
   </script>
 </body>
 </html>
