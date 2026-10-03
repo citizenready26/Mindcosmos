@@ -18,6 +18,8 @@
       --text: #f1f5f9;
       --text-muted: #808ea3;
       --accent: #3b82f6;
+      --error-bg: rgba(239, 68, 68, 0.1);
+      --error-text: #f87171;
       
       --tag-happy: #facc15;
       --tag-excited: #fb923c;
@@ -71,6 +73,7 @@
       max-width: 420px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.4);
       text-align: center;
+      position: relative;
     }
 
     .auth-brand-title {
@@ -90,8 +93,22 @@
     .auth-subtitle {
       font-size: 0.9rem;
       color: var(--text-muted);
-      margin-bottom: 32px;
+      margin-bottom: 24px;
       line-height: 1.5;
+    }
+
+    /* Professional Alert Box */
+    .alert-box {
+      display: none;
+      background: var(--error-bg);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--error-text);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      text-align: left;
+      margin-bottom: 20px;
+      line-height: 1.4;
     }
 
     .auth-inputs {
@@ -119,11 +136,17 @@
       color: var(--text);
       font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.2s;
+      transition: all 0.2s;
     }
 
     .auth-inputs input:focus {
       border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .auth-inputs input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .btn-main-auth {
@@ -136,11 +159,16 @@
       font-weight: 700;
       cursor: pointer;
       width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
       transition: transform 0.1s, opacity 0.2s;
     }
 
-    .btn-main-auth:hover { opacity: 0.9; }
-    .btn-main-auth:active { transform: scale(0.98); }
+    .btn-main-auth:hover:not(:disabled) { opacity: 0.9; }
+    .btn-main-auth:active:not(:disabled) { transform: scale(0.98); }
+    .btn-main-auth:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .divider {
       display: flex;
@@ -175,7 +203,8 @@
       transition: transform 0.1s, opacity 0.2s;
       margin-bottom: 16px;
     }
-    .btn-google-auth:hover { opacity: 0.9; }
+    .btn-google-auth:hover:not(:disabled) { opacity: 0.9; }
+    .btn-google-auth:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .auth-links {
       display: flex;
@@ -194,11 +223,28 @@
 
     .auth-link:hover { color: var(--text); }
 
-    .auth-error {
-      color: #ef4444;
-      font-size: 0.8rem;
+    /* Success State UI */
+    #authSuccessState {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 0;
+      animation: fadeIn 0.4s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .success-icon {
+      font-size: 3rem;
       margin-bottom: 16px;
-      min-height: 20px;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 20px;
+      border-radius: 50%;
+      line-height: 1;
     }
 
     /* -----------------------------------
@@ -340,7 +386,7 @@
     .filter-btn.special-filter { border-style: dashed; }
 
     .btn-post { background: var(--text); color: var(--bg); border: none; font-weight: 600; font-size: 0.82rem; padding: 8px 24px; border-radius: 999px; cursor: pointer; transition: opacity 0.2s; align-self: flex-end; }
-    .btn-post:hover { opacity: 0.9; }
+    .btn-post:hover:not(:disabled) { opacity: 0.9; }
     .btn-post:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .feed { display: flex; flex-direction: column; gap: 14px; }
@@ -400,38 +446,59 @@
        GATEKEEPER: WELCOME & AUTH SCREEN
        ============================================== -->
   <div id="welcomeScreen">
+    
+    <!-- Front Page Ad for Razorpay Reviewers & Visitors -->
+    <div style="background: linear-gradient(145deg, rgba(250, 204, 21, 0.1) 0%, rgba(245, 158, 11, 0.02) 100%); border: 1px solid rgba(250, 204, 21, 0.3); border-radius: 12px; padding: 12px; margin-bottom: 24px; text-align: center; max-width: 420px; width: 100%;">
+      <h3 style="color: #facc15; font-size: 0.9rem; margin-bottom: 4px;">⭐ Golden Membership - ₹89</h3>
+      <p style="color: var(--text-muted); font-size: 0.75rem;">Sign in to upgrade, get priority ranking, and stand out in the cosmos.</p>
+    </div>
+
     <div class="auth-card">
       <div class="auth-brand-title"><span class="mind">Mind</span><span class="cosmos">Cosmos</span></div>
-      <p class="auth-subtitle" id="authSubtitle">A safe space to cast your thoughts into the universe. Sign in to continue.</p>
+      
+      <!-- Dynamic Form Area -->
+      <div id="authFormArea">
+        <p class="auth-subtitle" id="authSubtitle">A safe space to cast your thoughts into the universe. Sign in to continue.</p>
 
-      <div class="auth-error" id="authErrorMessage"></div>
+        <!-- Professional Error Alert -->
+        <div class="alert-box" id="authAlertBox"></div>
 
-      <div class="auth-inputs">
-        <label for="authEmail">Email</label>
-        <input type="email" id="authEmail" placeholder="you@example.com">
-        
-        <label for="authPassword">Password</label>
-        <input type="password" id="authPassword" placeholder="••••••••">
+        <div class="auth-inputs">
+          <label for="authEmail">Email</label>
+          <input type="email" id="authEmail" placeholder="you@example.com">
+          
+          <label for="authPassword">Password</label>
+          <input type="password" id="authPassword" placeholder="••••••••">
+        </div>
+
+        <button class="btn-main-auth" id="authSubmitBtn" onclick="handleAuthSubmit()">Sign In</button>
+
+        <div class="divider">OR</div>
+
+        <button class="btn-google-auth" id="googleAuthBtn" onclick="handleGoogleSignIn()">
+          <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <div class="auth-links">
+          <button class="auth-link" id="forgotPasswordBtn" onclick="handleForgotPassword()">Forgot password?</button>
+          <button class="auth-link" id="authToggleBtn" onclick="toggleAuthMode()">Need an account? <strong>Sign Up</strong></button>
+        </div>
       </div>
 
-      <button class="btn-main-auth" id="authSubmitBtn" onclick="handleAuthSubmit()">Sign In</button>
-
-      <div class="divider">OR</div>
-
-      <button class="btn-google-auth" onclick="handleGoogleSignIn()">
-        <!-- Google G Logo SVG -->
-        <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        Continue with Google
-      </button>
-
-      <div class="auth-links">
-        <button class="auth-link" id="forgotPasswordBtn" onclick="handleForgotPassword()">Forgot password?</button>
-        <button class="auth-link" id="authToggleBtn" onclick="toggleAuthMode()">Need an account? <strong>Sign Up</strong></button>
+      <!-- Modern Success State (Hidden by Default) -->
+      <div id="authSuccessState">
+        <div class="success-icon">✉️</div>
+        <h3 style="color: var(--text); font-size: 1.3rem; margin-bottom: 8px;">Check your inbox</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 24px;">
+          We've sent a verification link to <br><strong id="sentEmailSpan" style="color: var(--text);"></strong>.<br><br>Please verify your email to access the cosmos.
+        </p>
+        <button class="btn-main-auth" onclick="resetToSignIn()" style="background: transparent; border: 1px solid var(--border); color: var(--text);">Back to Sign In</button>
       </div>
 
       <!-- Legal & Support Footer for Razorpay Compliance -->
@@ -441,7 +508,7 @@
           <a href="#" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
           <a href="#" style="color: var(--text-muted); text-decoration: none;">Refunds</a>
         </div>
-        <span>priyankhudehingia@gmail.com</span>
+        <span>Support: your-personal-email@gmail.com</span>
       </div>
     </div>
   </div>
@@ -554,7 +621,7 @@
     // 2. DOM Elements & State
     const welcomeScreen = document.getElementById('welcomeScreen');
     const mainApp = document.getElementById('mainApp');
-    const errorMsg = document.getElementById('authErrorMessage');
+    const alertBox = document.getElementById('authAlertBox');
     
     let currentUserId = null;
     let currentUserEmailPrefix = '';
@@ -734,10 +801,20 @@
       rzp.open();
     }
 
-    // 4. Authentication Functions
+    // 4. Professional Authentication Flow
+    function showError(message) {
+      alertBox.innerText = message;
+      alertBox.style.display = 'block';
+    }
+
+    function hideError() {
+      alertBox.style.display = 'none';
+      alertBox.innerText = '';
+    }
+
     function toggleAuthMode() {
       isSignUpMode = !isSignUpMode;
-      errorMsg.innerText = '';
+      hideError();
       
       const title = isSignUpMode ? "Join the Universe" : "A safe space to cast your thoughts into the universe. Sign in to continue.";
       document.getElementById('authSubtitle').innerText = title;
@@ -747,85 +824,123 @@
       document.getElementById('forgotPasswordBtn').style.display = isSignUpMode ? 'none' : 'block';
     }
 
+    function resetToSignIn() {
+      document.getElementById('authSuccessState').style.display = 'none';
+      document.getElementById('authFormArea').style.display = 'block';
+      
+      // Reset inputs & flip back to sign in
+      document.getElementById('authEmail').value = '';
+      document.getElementById('authPassword').value = '';
+      if (isSignUpMode) toggleAuthMode();
+    }
+
+    function setAuthLoading(isLoading) {
+      const btn = document.getElementById('authSubmitBtn');
+      const googleBtn = document.getElementById('googleAuthBtn');
+      const emailInput = document.getElementById('authEmail');
+      const passInput = document.getElementById('authPassword');
+
+      btn.disabled = isLoading;
+      googleBtn.disabled = isLoading;
+      emailInput.disabled = isLoading;
+      passInput.disabled = isLoading;
+
+      if (isLoading) {
+        btn.innerText = isSignUpMode ? "Creating account..." : "Signing in...";
+      } else {
+        btn.innerText = isSignUpMode ? "Create Account" : "Sign In";
+      }
+    }
+
     async function handleAuthSubmit() {
       const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value.trim();
       
-      errorMsg.style.color = '#ef4444';
-      errorMsg.innerText = '';
+      hideError();
 
       if (!email || !password) {
-        errorMsg.innerText = "Please enter both email and password.";
+        showError("Please enter both email and password.");
         return;
       }
 
-      const btn = document.getElementById('authSubmitBtn');
-      btn.innerText = "Please wait...";
-      btn.disabled = true;
+      setAuthLoading(true);
 
       try {
         if (isSignUpMode) {
+          // SIGN UP
           const userCredential = await auth.createUserWithEmailAndPassword(email, password);
           await userCredential.user.sendEmailVerification();
           await auth.signOut();
           
-          errorMsg.style.color = '#10b981';
-          errorMsg.innerText = "Account created! Check your inbox to verify your email before signing in.";
+          // Switch to Modern Success State
+          document.getElementById('authFormArea').style.display = 'none';
+          document.getElementById('sentEmailSpan').innerText = email;
+          document.getElementById('authSuccessState').style.display = 'flex';
+          
         } else {
+          // SIGN IN
           const userCredential = await auth.signInWithEmailAndPassword(email, password);
           if (!userCredential.user.emailVerified) {
             await auth.signOut();
-            errorMsg.style.color = '#f59e0b';
-            errorMsg.innerText = "Please verify your email address first. Check your inbox!";
+            showError("Your email has not been verified yet. Please check your inbox.");
           }
         }
       } catch (err) {
-        let message = err.message;
-        if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-          message = "Invalid email or password.";
+        // Professional Custom Error Mapping
+        let message = "Something went wrong. Please try again.";
+        
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+          message = "We couldn't find an account with that email and password. Please check your details or sign up.";
+        } else if (err.code === 'auth/wrong-password') {
+          message = "Incorrect password. Please try again.";
         } else if (err.code === 'auth/email-already-in-use') {
-          message = "An account with this email already exists.";
+          message = "An account with this email already exists. Please sign in instead.";
         } else if (err.code === 'auth/weak-password') {
-          message = "Password should be at least 6 characters.";
+          message = "Your password is too weak. It must be at least 6 characters long.";
+        } else if (err.code === 'auth/invalid-email') {
+          message = "Please enter a valid email address.";
+        } else if (err.code === 'auth/too-many-requests') {
+          message = "Too many attempts. Please wait a moment and try again.";
         }
-        errorMsg.innerText = message;
+        showError(message);
       } finally {
-        btn.innerText = isSignUpMode ? "Create Account" : "Sign In";
-        btn.disabled = false;
+        setAuthLoading(false);
       }
     }
 
     const googleProvider = new firebase.auth.GoogleAuthProvider();
 
     async function handleGoogleSignIn() {
-      errorMsg.style.color = '#ef4444';
-      errorMsg.innerText = '';
+      hideError();
+      setAuthLoading(true);
       try {
         await auth.signInWithPopup(googleProvider);
       } catch (err) {
-        if (err.code !== 'auth/popup-closed-by-user') {
-          errorMsg.innerText = "Google sign-in failed. Please try again.";
-          console.error(err);
+        if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+          showError("Google sign-in failed. Please try again or use your email.");
         }
+      } finally {
+        setAuthLoading(false);
       }
     }
 
     async function handleForgotPassword() {
       const email = document.getElementById('authEmail').value.trim();
-      errorMsg.innerText = '';
+      hideError();
 
       if (!email) {
-        errorMsg.innerText = "Please enter your email address first to reset your password.";
+        showError("Please enter your email address in the box first to reset your password.");
         return;
       }
 
+      setAuthLoading(true);
       try {
         await auth.sendPasswordResetEmail(email);
-        errorMsg.style.color = '#10b981';
-        errorMsg.innerText = `A password reset link has been sent to ${email}.`;
-        setTimeout(() => { errorMsg.style.color = '#ef4444'; }, 5000); 
+        alert(`A password reset link has been sent to ${email}.`);
       } catch (err) {
-        errorMsg.innerText = "Error sending reset email. Please ensure the email is correct.";
+        showError("Error sending reset email. Please ensure the email is typed correctly.");
+      } finally {
+        setAuthLoading(false);
       }
     }
 
