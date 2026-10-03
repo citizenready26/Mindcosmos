@@ -433,6 +433,16 @@
         <button class="auth-link" id="forgotPasswordBtn" onclick="handleForgotPassword()">Forgot password?</button>
         <button class="auth-link" id="authToggleBtn" onclick="toggleAuthMode()">Need an account? <strong>Sign Up</strong></button>
       </div>
+
+      <!-- Legal & Support Footer for Razorpay Compliance -->
+      <div style="margin-top: 24px; font-size: 0.72rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px; align-items: center; border-top: 1px solid var(--border); padding-top: 16px;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+          <a href="#" style="color: var(--text-muted); text-decoration: none;">Terms & Conditions</a>
+          <a href="#" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+          <a href="#" style="color: var(--text-muted); text-decoration: none;">Refunds</a>
+        </div>
+        <span>Support: your-personal-email@gmail.com</span>
+      </div>
     </div>
   </div>
 
@@ -464,6 +474,18 @@
     </header>
 
     <div class="app-container">
+      
+      <!-- Golden Membership Ad Banner (Hides for active members) -->
+      <div id="premiumAdBanner" style="display: none; background: linear-gradient(145deg, rgba(250, 204, 21, 0.1) 0%, rgba(245, 158, 11, 0.02) 100%); border: 1px solid rgba(250, 204, 21, 0.3); border-radius: 16px; padding: 16px 20px; margin-bottom: 24px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h3 style="color: #facc15; font-size: 0.95rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">⭐ Get the Golden Star</h3>
+          <p style="color: var(--text-muted); font-size: 0.8rem;">Stand out in the cosmos. Get priority feed ranking and support the platform.</p>
+        </div>
+        <button onclick="handleBecomeMember()" style="background: #facc15; color: #000; border: none; padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap; transition: transform 0.2s;">
+          Upgrade Now - ₹89
+        </button>
+      </div>
+
       <!-- Composer -->
       <div class="composer">
         <textarea id="questionInput" placeholder="What thought or feeling is in your mind right now?" maxlength="320"></textarea>
@@ -537,7 +559,7 @@
     let currentUserId = null;
     let currentUserEmailPrefix = '';
     let isSignUpMode = false;
-    let userMembershipsCache = {}; // Cache to track who is a member
+    let userMembershipsCache = {};
 
     // 3. Auth State Observer (The Gatekeeper)
     auth.onAuthStateChanged(async user => {
@@ -549,7 +571,6 @@
         
         document.getElementById('authBadgeText').innerHTML = `<span>👤 ${currentUserEmailPrefix} ▾</span>`;
         
-        // Fetch membership status
         await checkUserMembership(currentUserId);
         listenToFeed(); 
       } else {
@@ -583,15 +604,24 @@
         if (doc.exists && doc.data().isMember) {
           userMembershipsCache[uid] = true;
 
-          // Update the dropdown menu button if membership is active
+          // Update Dropdown UI
           const memberBtn = document.querySelector('.member-tier');
           if (memberBtn) {
             memberBtn.innerHTML = '⭐ Golden Member Active';
             memberBtn.onclick = null;
             memberBtn.style.cursor = 'default';
           }
+          
+          // Hide the ad banner since they already paid
+          const adBanner = document.getElementById('premiumAdBanner');
+          if (adBanner) adBanner.style.display = 'none';
+
         } else {
           userMembershipsCache[uid] = false;
+          
+          // Show the ad banner to non-members
+          const adBanner = document.getElementById('premiumAdBanner');
+          if (adBanner) adBanner.style.display = 'flex';
         }
       } catch (err) {
         console.error(err);
@@ -606,14 +636,12 @@
         <div id="paymentModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(9, 11, 16, 0.85); backdrop-filter: blur(6px); z-index:2000; display:flex; align-items:center; justify-content:center;">
           <div style="background:var(--surface); padding:32px 24px; border-radius:24px; border:1px solid var(--border); width:90%; max-width:400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);">
             
-            <!-- Header -->
             <div style="text-align: center; margin-bottom: 24px;">
               <div style="font-size: 2.8rem; margin-bottom: 8px; line-height: 1;">⭐</div>
               <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 6px; color: var(--text);">Golden Membership</h2>
               <p style="font-size: 0.85rem; color: var(--text-muted);">Stand out in the cosmos and support the universe.</p>
             </div>
 
-            <!-- Features List -->
             <div style="background: rgba(0,0,0,0.25); border-radius: 16px; padding: 16px; margin-bottom: 24px;">
               <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                 <span style="font-size: 1.1rem;">✨</span>
@@ -629,10 +657,7 @@
               </div>
             </div>
 
-            <!-- Payment Options -->
             <div style="display: flex; flex-direction: column; gap: 16px;">
-              
-              <!-- Razorpay (Indian Users) -->
               <div>
                 <p style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">For Indian Users (UPI / Cards)</p>
                 <button onclick="startRazorpay()" style="width: 100%; background: #3395FF; color: #fff; border: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: opacity 0.2s;">
@@ -642,22 +667,18 @@
 
               <div class="divider" style="margin: 4px 0;"></div>
 
-              <!-- PayPal (International Users) -->
               <div>
                 <p style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">For International Users (USD)</p>
                 <div id="paypal-button-container"></div>
               </div>
-
             </div>
 
-            <!-- Cancel Button -->
             <button onclick="document.getElementById('paymentModal').remove()" style="margin-top:20px; width: 100%; background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size: 0.88rem; padding: 8px;">Maybe Later</button>
           </div>
         </div>
       `;
       document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-      // Render PayPal SDK buttons
       paypal.Buttons({
         style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
         createOrder: function(data, actions) {
@@ -686,8 +707,8 @@
     // Razorpay Integration
     function startRazorpay() {
       const options = {
-        "key": "rzp_test_TjVfNjCtdK2s5R", // <--- PASTE YOUR KEY HERE (rzp_test_... or rzp_live_...)
-        "amount": "8900", // ₹89.00 in paise
+        "key": "YOUR_RAZORPAY_KEY", 
+        "amount": "8900", 
         "currency": "INR",
         "name": "MindCosmos",
         "description": "Golden Membership Pass",
@@ -698,7 +719,7 @@
           setTimeout(() => { location.reload(); }, 2500);
         },
         "notes": {
-          "custom_id": currentUserId // Used by Make.com webhook to locate the user
+          "custom_id": currentUserId 
         },
         "theme": {
           "color": "#3b82f6"
@@ -706,12 +727,10 @@
       };
       
       const rzp = new Razorpay(options);
-      
       rzp.on('payment.failed', function (response){
         console.error("Razorpay Error:", response.error.description);
         alert("Payment failed or cancelled. Please try again.");
       });
-      
       rzp.open();
     }
 
@@ -816,7 +835,7 @@
       }
     }
 
-    // 5. App Functionality (Feed, Posting, Filtering, Priority Sorting)
+    // 5. App Functionality
     function scrollFilters(amount) { document.getElementById('filterBar').scrollBy({ left: amount, behavior: 'smooth' }); }
     function scrollPicker(amount) { document.getElementById('emotionPicker').scrollBy({ left: amount, behavior: 'smooth' }); }
 
@@ -864,7 +883,6 @@
             if (item.authorId) authorIdsToFetch.add(item.authorId);
           });
 
-          // Fetch member statuses for authors in bulk
           for (let uId of authorIdsToFetch) {
             if (userMembershipsCache[uId] === undefined) {
               try {
@@ -876,7 +894,6 @@
             }
           }
 
-          // Fetch user interactions for "My feed"
           for (let item of fetchedItems) {
             try {
               const ansSnap = await db.collection('questions').doc(item.id).collection('answers')
@@ -901,7 +918,6 @@
       feedContainer.innerHTML = '';
       let visibleCount = 0;
 
-      // Sort feed: Members' thoughts float to the top
       let sortedItems = [...allQuestionsCache].sort((a, b) => {
         const aMember = userMembershipsCache[a.authorId] ? 1 : 0;
         const bMember = userMembershipsCache[b.authorId] ? 1 : 0;
