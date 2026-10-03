@@ -249,6 +249,11 @@
     .brand-subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
     .brand-subtitle span { color: #ffffff; font-weight: 600; }
 
+    /* Profile Dropdown Menu */
+    .profile-dropdown-container {
+      position: relative;
+    }
+    
     .auth-badge {
       display: flex;
       align-items: center;
@@ -263,6 +268,52 @@
       transition: all 0.2s ease;
     }
     .auth-badge:hover { border-color: var(--border-focus); color: var(--text); }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      width: 210px;
+      z-index: 1000;
+      overflow: hidden;
+    }
+    .dropdown-menu.show {
+      display: block;
+    }
+    .dropdown-item {
+      padding: 12px 16px;
+      font-size: 0.82rem;
+      color: var(--text);
+      background: transparent;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s;
+      text-decoration: none;
+    }
+    .dropdown-item:hover {
+      background: var(--surface-hover);
+    }
+    .dropdown-item.member-tier {
+      color: #facc15;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .member-star {
+      color: #facc15;
+      margin-left: 4px;
+      font-size: 0.85rem;
+    }
 
     .composer { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 24px; transition: border-color 0.2s; }
     .composer:focus-within { border-color: rgba(59, 130, 246, 0.5); }
@@ -392,9 +443,18 @@
           <div class="brand-title"><span class="mind">Mind</span><span class="cosmos">Cosmos</span></div>
           <div class="brand-subtitle">by <span>inMind</span></div>
         </div>
-        <div class="auth-badge" onclick="handleSignOut()" id="authBadgeText">
-          <span>👤 Sign Out</span>
+        
+        <!-- Profile Dropdown Menu -->
+        <div class="profile-dropdown-container">
+          <div class="auth-badge" onclick="toggleProfileDropdown()" id="authBadgeText">
+            <span>👤 Account</span>
+          </div>
+          <div class="dropdown-menu" id="profileDropdown">
+            <button class="dropdown-item member-tier" onclick="handleBecomeMember()">⭐ Become a Member ($1)</button>
+            <button class="dropdown-item" onclick="handleSignOut()">🚪 Sign Out</button>
+          </div>
         </div>
+
       </div>
     </header>
 
@@ -449,7 +509,7 @@
   </div>
 
   <script>
-    // 1. Firebase Initialization (Replace with your actual config)
+    // 1. Firebase Initialization
     const firebaseConfig = {
       apiKey: "AIzaSyC_jtZZWz6h9qMAZa7nsNX-pdzt6qjyIno",
       authDomain: "inmind-8e8fb.firebaseapp.com",
@@ -470,21 +530,26 @@
     const errorMsg = document.getElementById('authErrorMessage');
     
     let currentUserId = null;
+    let currentUserEmailPrefix = '';
     let isSignUpMode = false;
+    let userMembershipsCache = {}; // Cache to track who is a member
 
     // 3. Auth State Observer (The Gatekeeper)
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged(async user => {
       if (user && user.emailVerified) {
         currentUserId = user.uid;
+        currentUserEmailPrefix = user.email.split('@')[0];
         welcomeScreen.style.display = 'none';
         mainApp.style.display = 'flex';
         
-        const emailPrefix = user.email.split('@')[0];
-        document.getElementById('authBadgeText').innerHTML = `<span>👤 ${emailPrefix} (Sign Out)</span>`;
+        document.getElementById('authBadgeText').innerHTML = `<span>👤 ${currentUserEmailPrefix} ▾</span>`;
         
+        // Fetch membership status
+        await checkUserMembership(currentUserId);
         listenToFeed(); 
       } else {
         currentUserId = null;
+        currentUserEmailPrefix = '';
         welcomeScreen.style.display = 'flex';
         mainApp.style.display = 'none';
         
@@ -494,6 +559,45 @@
         }
       }
     });
+
+    // Profile Dropdown Handling
+    function toggleProfileDropdown() {
+      const menu = document.getElementById('profileDropdown');
+      menu.classList.toggle('show');
+    }
+
+    window.addEventListener('click', function(e) {
+      if (!e.target.closest('.profile-dropdown-container')) {
+        document.getElementById('profileDropdown')?.classList.remove('show');
+      }
+    });
+
+    async function checkUserMembership(uid) {
+      try {
+        const doc = await db.collection('users').doc(uid).get();
+        if (doc.exists && doc.data().isMember) {
+          userMembershipsCache[uid] = true;
+        } else {
+          userMembershipsCache[uid] = false;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function handleBecomeMember() {
+      toggleProfileDropdown();
+      if (confirm("Unlock Member status for $1? (This will grant you a golden star and priority feed ranking)")) {
+        try {
+          await db.collection('users').doc(currentUserId).set({ isMember: true }, { merge: true });
+          userMembershipsCache[currentUserId] = true;
+          alert("Welcome to MindCosmos Membership! Your status is now active.");
+          renderFeed();
+        } catch (err) {
+          alert("Failed to update membership status.");
+        }
+      }
+    }
 
     // 4. Authentication Functions
     function toggleAuthMode() {
@@ -596,7 +700,7 @@
       }
     }
 
-    // 5. App Functionality (Feed, Posting, Filtering)
+    // 5. App Functionality (Feed, Posting, Filtering, Priority Sorting)
     function scrollFilters(amount) { document.getElementById('filterBar').scrollBy({ left: amount, behavior: 'smooth' }); }
     function scrollPicker(amount) { document.getElementById('emotionPicker').scrollBy({ left: amount, behavior: 'smooth' }); }
 
@@ -630,28 +734,46 @@
       unsubscribeFeed = db.collection('questions')
         .orderBy('createdAt', 'desc')
         .limit(100)
-        .onSnapshot(snapshot => {
+        .onSnapshot(async snapshot => {
           allQuestionsCache = [];
           userInteractedQuestionIds.clear();
           
-          let pendingFetches = snapshot.docs.length;
-          if (pendingFetches === 0) { renderFeed(); return; }
+          let fetchedItems = [];
+          let authorIdsToFetch = new Set();
 
           snapshot.forEach(doc => {
             const item = doc.data();
             item.id = doc.id;
-            allQuestionsCache.push(item);
-
-            db.collection('questions').doc(doc.id).collection('answers')
-              .where('authorId', '==', currentUserId)
-              .get()
-              .then(ansSnap => { if (!ansSnap.empty) userInteractedQuestionIds.add(doc.id); })
-              .catch(err => console.error(err))
-              .finally(() => {
-                pendingFetches--;
-                if (pendingFetches === 0) renderFeed();
-              });
+            fetchedItems.push(item);
+            if (item.authorId) authorIdsToFetch.add(item.authorId);
           });
+
+          // Fetch member statuses for authors in bulk
+          for (let uId of authorIdsToFetch) {
+            if (userMembershipsCache[uId] === undefined) {
+              try {
+                const uDoc = await db.collection('users').doc(uId).get();
+                userMembershipsCache[uId] = (uDoc.exists && uDoc.data().isMember === true);
+              } catch (e) {
+                userMembershipsCache[uId] = false;
+              }
+            }
+          }
+
+          // Fetch user interactions for "My feed"
+          for (let item of fetchedItems) {
+            try {
+              const ansSnap = await db.collection('questions').doc(item.id).collection('answers')
+                .where('authorId', '==', currentUserId)
+                .get();
+              if (!ansSnap.empty) userInteractedQuestionIds.add(item.id);
+            } catch (err) {
+              console.error(err);
+            }
+          }
+
+          allQuestionsCache = fetchedItems;
+          renderFeed();
         }, err => {
           console.error(err);
           feedContainer.innerHTML = `<div class="empty-state">Unable to load feed. Check Firestore Rules.</div>`;
@@ -663,7 +785,20 @@
       feedContainer.innerHTML = '';
       let visibleCount = 0;
 
-      allQuestionsCache.forEach(item => {
+      // Sort feed: Members thoughts float to the top!
+      let sortedItems = [...allQuestionsCache].sort((a, b) => {
+        const aMember = userMembershipsCache[a.authorId] ? 1 : 0;
+        const bMember = userMembershipsCache[b.authorId] ? 1 : 0;
+        if (aMember !== bMember) {
+          return bMember - aMember; // Member comes first
+        }
+        // Fallback to newest timestamp
+        const timeA = a.createdAt ? a.createdAt.toMillis() : 0;
+        const timeB = b.createdAt ? b.createdAt.toMillis() : 0;
+        return timeB - timeA;
+      });
+
+      sortedItems.forEach(item => {
         if (currentFilter === 'MyFeed' && item.authorId !== currentUserId && !userInteractedQuestionIds.has(item.id)) return;
         if (currentFilter !== 'All' && currentFilter !== 'MyFeed' && item.emotion !== currentFilter) return;
 
@@ -683,10 +818,11 @@
       const rawEmotion = data.emotion || 'lost';
       const emotionClass = `badge-${rawEmotion.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
       const isOwner = data.authorId === currentUserId;
+      const isMemberAuthor = userMembershipsCache[data.authorId] === true;
 
       card.innerHTML = `
         <div class="card-header">
-          <span class="badge ${emotionClass}">${escapeHtml(data.emotion || 'Thought')}</span>
+          <span class="badge ${emotionClass}">${escapeHtml(data.emotion || 'Thought')} ${isMemberAuthor ? '<span class="member-star">⭐</span>' : ''}</span>
           <span class="card-time">${timeAgo(dateObj)}</span>
         </div>
         <div class="card-question">${escapeHtml(data.text)}</div>
