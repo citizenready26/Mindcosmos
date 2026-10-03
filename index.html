@@ -278,7 +278,7 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      width: 210px;
+      width: 230px;
       z-index: 1000;
       overflow: hidden;
     }
@@ -385,9 +385,14 @@
     .empty-state { text-align: center; padding: 48px 16px; color: var(--text-muted); font-size: 0.9rem; }
   </style>
 
+  <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <!-- PayPal & Razorpay SDKs -->
+  <script src="https://www.paypal.com/sdk/js?client-id=BAAYBEl7apEtdKFkGH7pZqmc-q0VNQDSJf5mmABauI9udXXk9bsL53wXw57gOzQgqrza-aMmRVhytP2Ifk&currency=USD"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 
@@ -450,7 +455,7 @@
             <span>👤 Account</span>
           </div>
           <div class="dropdown-menu" id="profileDropdown">
-            <button class="dropdown-item member-tier" onclick="handleBecomeMember()">⭐ Become a Member ($1)</button>
+            <button class="dropdown-item member-tier" onclick="handleBecomeMember()">⭐ Become a Member</button>
             <button class="dropdown-item" onclick="handleSignOut()">🚪 Sign Out</button>
           </div>
         </div>
@@ -507,7 +512,7 @@
       </div>
     </div>
   </div>
-<script src="https://www.paypal.com/sdk/js?client-id=BAAYBEl7apEtdKFkGH7pZqmc-q0VNQDSJf5mmABauI9udXXk9bsL53wXw57gOzQgqrza-aMmRVhytP2Ifk&currency=USD"></script>
+
   <script>
     // 1. Firebase Initialization
     const firebaseConfig = {
@@ -577,6 +582,14 @@
         const doc = await db.collection('users').doc(uid).get();
         if (doc.exists && doc.data().isMember) {
           userMembershipsCache[uid] = true;
+
+          // Update the dropdown menu button if membership is active
+          const memberBtn = document.querySelector('.member-tier');
+          if (memberBtn) {
+            memberBtn.innerHTML = '⭐ Golden Member Active';
+            memberBtn.onclick = null;
+            memberBtn.style.cursor = 'default';
+          }
         } else {
           userMembershipsCache[uid] = false;
         }
@@ -585,27 +598,73 @@
       }
     }
 
-  function handleBecomeMember() {
+    // Modal Presentation
+    function handleBecomeMember() {
       toggleProfileDropdown();
       
       const modalHtml = `
-        <div id="paymentModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; display:flex; align-items:center; justify-content:center;">
-          <div style="background:var(--surface); padding:24px; border-radius:16px; border:1px solid var(--border); width:90%; max-width:400px; text-align:center;">
-            <h2 style="margin-bottom:12px;">Become a Member</h2>
-            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:24px;">Unlock your golden star ⭐ and priority feed ranking for just $1.00.</p>
-            <div id="paypal-button-container"></div>
-            <button onclick="document.getElementById('paymentModal').remove()" style="margin-top:16px; background:transparent; border:none; color:var(--text-muted); cursor:pointer;">Cancel</button>
+        <div id="paymentModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(9, 11, 16, 0.85); backdrop-filter: blur(6px); z-index:2000; display:flex; align-items:center; justify-content:center;">
+          <div style="background:var(--surface); padding:32px 24px; border-radius:24px; border:1px solid var(--border); width:90%; max-width:400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);">
+            
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 24px;">
+              <div style="font-size: 2.8rem; margin-bottom: 8px; line-height: 1;">⭐</div>
+              <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 6px; color: var(--text);">Golden Membership</h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Stand out in the cosmos and support the universe.</p>
+            </div>
+
+            <!-- Features List -->
+            <div style="background: rgba(0,0,0,0.25); border-radius: 16px; padding: 16px; margin-bottom: 24px;">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <span style="font-size: 1.1rem;">✨</span>
+                <span style="font-size: 0.88rem; color: var(--text);">Exclusive <strong>Golden Star</strong> badge</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <span style="font-size: 1.1rem;">🚀</span>
+                <span style="font-size: 0.88rem; color: var(--text);"><strong>Priority ranking</strong> in the global feed</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 1.1rem;">💖</span>
+                <span style="font-size: 0.88rem; color: var(--text);">Support platform development</span>
+              </div>
+            </div>
+
+            <!-- Payment Options -->
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              
+              <!-- Razorpay (Indian Users) -->
+              <div>
+                <p style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">For Indian Users (UPI / Cards)</p>
+                <button onclick="startRazorpay()" style="width: 100%; background: #3395FF; color: #fff; border: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: opacity 0.2s;">
+                  Pay ₹89 via Razorpay
+                </button>
+              </div>
+
+              <div class="divider" style="margin: 4px 0;"></div>
+
+              <!-- PayPal (International Users) -->
+              <div>
+                <p style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">For International Users (USD)</p>
+                <div id="paypal-button-container"></div>
+              </div>
+
+            </div>
+
+            <!-- Cancel Button -->
+            <button onclick="document.getElementById('paymentModal').remove()" style="margin-top:20px; width: 100%; background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size: 0.88rem; padding: 8px;">Maybe Later</button>
           </div>
         </div>
       `;
       document.body.insertAdjacentHTML('beforeend', modalHtml);
 
+      // Render PayPal SDK buttons
       paypal.Buttons({
+        style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
         createOrder: function(data, actions) {
           return actions.order.create({
             purchase_units: [{
               amount: { value: '1.00' },
-              description: 'MindCosmos Member Pass',
+              description: 'MindCosmos Golden Membership',
               custom_id: currentUserId 
             }]
           });
@@ -622,6 +681,38 @@
           alert("Payment process failed. Please try again.");
         }
       }).render('#paypal-button-container');
+    }
+
+    // Razorpay Integration
+    function startRazorpay() {
+      const options = {
+        "key": "YOUR_RAZORPAY_KEY", // <--- PASTE YOUR KEY HERE (rzp_test_... or rzp_live_...)
+        "amount": "8900", // ₹89.00 in paise
+        "currency": "INR",
+        "name": "MindCosmos",
+        "description": "Golden Membership Pass",
+        "handler": function (response) {
+          alert("Payment successful! Your star is being minted...");
+          const modal = document.getElementById('paymentModal');
+          if (modal) modal.remove();
+          setTimeout(() => { location.reload(); }, 2500);
+        },
+        "notes": {
+          "custom_id": currentUserId // Used by Make.com webhook to locate the user
+        },
+        "theme": {
+          "color": "#3b82f6"
+        }
+      };
+      
+      const rzp = new Razorpay(options);
+      
+      rzp.on('payment.failed', function (response){
+        console.error("Razorpay Error:", response.error.description);
+        alert("Payment failed or cancelled. Please try again.");
+      });
+      
+      rzp.open();
     }
 
     // 4. Authentication Functions
@@ -810,14 +901,13 @@
       feedContainer.innerHTML = '';
       let visibleCount = 0;
 
-      // Sort feed: Members thoughts float to the top!
+      // Sort feed: Members' thoughts float to the top
       let sortedItems = [...allQuestionsCache].sort((a, b) => {
         const aMember = userMembershipsCache[a.authorId] ? 1 : 0;
         const bMember = userMembershipsCache[b.authorId] ? 1 : 0;
         if (aMember !== bMember) {
-          return bMember - aMember; // Member comes first
+          return bMember - aMember;
         }
-        // Fallback to newest timestamp
         const timeA = a.createdAt ? a.createdAt.toMillis() : 0;
         const timeB = b.createdAt ? b.createdAt.toMillis() : 0;
         return timeB - timeA;
