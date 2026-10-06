@@ -48,9 +48,7 @@
       align-items: center;
     }
 
-    /* -----------------------------------
-       Welcome / Auth Screen (Gatekeeper)
-       ----------------------------------- */
+    /* Welcome / Auth Screen */
     #welcomeScreen {
       display: flex;
       flex-direction: column;
@@ -97,7 +95,6 @@
       line-height: 1.5;
     }
 
-    /* Professional Alert Box */
     .alert-box {
       display: none;
       background: var(--error-bg);
@@ -220,36 +217,9 @@
       cursor: pointer;
       transition: color 0.2s;
     }
-
     .auth-link:hover { color: var(--text); }
 
-    /* Success State UI */
-    #authSuccessState {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px 0;
-      animation: fadeIn 0.4s ease-out;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .success-icon {
-      font-size: 3rem;
-      margin-bottom: 16px;
-      background: rgba(16, 185, 129, 0.1);
-      padding: 20px;
-      border-radius: 50%;
-      line-height: 1;
-    }
-
-    /* -----------------------------------
-       Main Application (Hidden by Default)
-       ----------------------------------- */
+    /* Main Application */
     #mainApp {
       display: none; 
       width: 100%;
@@ -296,9 +266,7 @@
     .brand-subtitle span { color: #ffffff; font-weight: 600; }
 
     /* Profile Dropdown Menu */
-    .profile-dropdown-container {
-      position: relative;
-    }
+    .profile-dropdown-container { position: relative; }
     
     .auth-badge {
       display: flex;
@@ -328,9 +296,7 @@
       z-index: 1000;
       overflow: hidden;
     }
-    .dropdown-menu.show {
-      display: block;
-    }
+    .dropdown-menu.show { display: block; }
     .dropdown-item {
       padding: 12px 16px;
       font-size: 0.82rem;
@@ -344,22 +310,9 @@
       align-items: center;
       gap: 8px;
       transition: background 0.15s;
-      text-decoration: none;
     }
-    .dropdown-item:hover {
-      background: var(--surface-hover);
-    }
-    .dropdown-item.member-tier {
-      color: #facc15;
-      font-weight: 600;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .member-star {
-      color: #facc15;
-      margin-left: 4px;
-      font-size: 0.85rem;
-    }
+    .dropdown-item:hover { background: var(--surface-hover); }
+    .dropdown-item.member-tier { color: #facc15; font-weight: 600; border-bottom: 1px solid var(--border); }
 
     .composer { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 24px; transition: border-color 0.2s; }
     .composer:focus-within { border-color: rgba(59, 130, 246, 0.5); }
@@ -436,9 +389,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-  <!-- PayPal & Razorpay SDKs -->
+  <!-- PayPal SDK (Make sure this is your LIVE Client ID) -->
   <script src="https://www.paypal.com/sdk/js?client-id=BAAYBEl7apEtdKFkGH7pZqmc-q0VNQDSJf5mmABauI9udXXk9bsL53wXw57gOzQgqrza-aMmRVhytP2Ifk&currency=USD"></script>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 
@@ -447,20 +399,12 @@
        ============================================== -->
   <div id="welcomeScreen">
     
-    <!-- Front Page Ad for Razorpay Reviewers & Visitors -->
-    <div style="background: linear-gradient(145deg, rgba(250, 204, 21, 0.1) 0%, rgba(245, 158, 11, 0.02) 100%); border: 1px solid rgba(250, 204, 21, 0.3); border-radius: 12px; padding: 12px; margin-bottom: 24px; text-align: center; max-width: 420px; width: 100%;">
-      <h3 style="color: #facc15; font-size: 0.9rem; margin-bottom: 4px;">⭐ Golden Membership - ₹89</h3>
-      <p style="color: var(--text-muted); font-size: 0.75rem;">Sign in to upgrade, get priority ranking, and stand out in the cosmos.</p>
-    </div>
-
     <div class="auth-card">
       <div class="auth-brand-title"><span class="mind">Mind</span><span class="cosmos">Cosmos</span></div>
       
-      <!-- Dynamic Form Area -->
       <div id="authFormArea">
         <p class="auth-subtitle" id="authSubtitle">A safe space to cast your thoughts into the universe. Sign in to continue.</p>
 
-        <!-- Professional Error Alert -->
         <div class="alert-box" id="authAlertBox"></div>
 
         <div class="auth-inputs">
@@ -491,17 +435,6 @@
         </div>
       </div>
 
-      <!-- Modern Success State (Hidden by Default) -->
-      <div id="authSuccessState">
-        <div class="success-icon">✉️</div>
-        <h3 style="color: var(--text); font-size: 1.3rem; margin-bottom: 8px;">Check your inbox</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 24px;">
-          We've sent a verification link to <br><strong id="sentEmailSpan" style="color: var(--text);"></strong>.<br><br>Please verify your email to access the cosmos.
-        </p>
-        <button class="btn-main-auth" onclick="resetToSignIn()" style="background: transparent; border: 1px solid var(--border); color: var(--text);">Back to Sign In</button>
-      </div>
-
-      <!-- Legal & Support Footer for Razorpay Compliance -->
       <div style="margin-top: 24px; font-size: 0.72rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px; align-items: center; border-top: 1px solid var(--border); padding-top: 16px;">
         <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
           <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms & Conditions</a>
@@ -518,7 +451,6 @@
        ============================================== -->
   <div id="mainApp">
     
-    <!-- Sticky Header -->
     <header>
       <div class="header-inner">
         <div class="brand">
@@ -526,7 +458,6 @@
           <div class="brand-subtitle">by <span>inMind</span></div>
         </div>
         
-        <!-- Profile Dropdown Menu -->
         <div class="profile-dropdown-container">
           <div class="auth-badge" onclick="toggleProfileDropdown()" id="authBadgeText">
             <span>👤 Account</span>
@@ -536,24 +467,22 @@
             <button class="dropdown-item" onclick="handleSignOut()">🚪 Sign Out</button>
           </div>
         </div>
-
       </div>
     </header>
 
     <div class="app-container">
       
-      <!-- Golden Membership Ad Banner (Hides for active members) -->
+      <!-- New Minimal, Price-Free Banner -->
       <div id="premiumAdBanner" style="display: none; background: linear-gradient(145deg, rgba(250, 204, 21, 0.1) 0%, rgba(245, 158, 11, 0.02) 100%); border: 1px solid rgba(250, 204, 21, 0.3); border-radius: 16px; padding: 16px 20px; margin-bottom: 24px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
         <div>
           <h3 style="color: #facc15; font-size: 0.95rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">⭐ Get the Golden Star</h3>
-          <p style="color: var(--text-muted); font-size: 0.8rem;">Stand out in the cosmos. Get priority feed ranking and support the platform.</p>
+          <p style="color: var(--text-muted); font-size: 0.8rem;">Priority ranking & exclusive badge.</p>
         </div>
         <button onclick="handleBecomeMember()" style="background: #facc15; color: #000; border: none; padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap; transition: transform 0.2s;">
-          Upgrade Now - ₹89
+          Become a Member
         </button>
       </div>
 
-      <!-- Composer -->
       <div class="composer">
         <textarea id="questionInput" placeholder="What thought or feeling is in your mind right now?" maxlength="320"></textarea>
         <div class="composer-footer">
@@ -576,7 +505,6 @@
         </div>
       </div>
 
-      <!-- Emotion Filter Bar -->
       <div class="filter-wrapper">
         <button class="scroll-btn" onclick="scrollFilters(-150)" title="Scroll Left">&#10094;</button>
         <div class="filter-bar" id="filterBar">
@@ -595,7 +523,6 @@
         <button class="scroll-btn" onclick="scrollFilters(150)" title="Scroll Right">&#10095;</button>
       </div>
 
-      <!-- Feed Container -->
       <div class="feed" id="feedContainer">
         <div class="empty-state">Loading thoughts...</div>
       </div>
@@ -630,7 +557,7 @@
 
     // 3. Auth State Observer (The Gatekeeper)
     auth.onAuthStateChanged(async user => {
-      if (user && user.emailVerified) {
+      if (user) { 
         currentUserId = user.uid;
         currentUserEmailPrefix = user.email.split('@')[0];
         welcomeScreen.style.display = 'none';
@@ -653,7 +580,6 @@
       }
     });
 
-    // Profile Dropdown Handling
     function toggleProfileDropdown() {
       const menu = document.getElementById('profileDropdown');
       menu.classList.toggle('show');
@@ -671,7 +597,6 @@
         if (doc.exists && doc.data().isMember) {
           userMembershipsCache[uid] = true;
 
-          // Update Dropdown UI
           const memberBtn = document.querySelector('.member-tier');
           if (memberBtn) {
             memberBtn.innerHTML = '⭐ Golden Member Active';
@@ -679,14 +604,11 @@
             memberBtn.style.cursor = 'default';
           }
           
-          // Hide the ad banner since they already paid
           const adBanner = document.getElementById('premiumAdBanner');
           if (adBanner) adBanner.style.display = 'none';
 
         } else {
           userMembershipsCache[uid] = false;
-          
-          // Show the ad banner to non-members
           const adBanner = document.getElementById('premiumAdBanner');
           if (adBanner) adBanner.style.display = 'flex';
         }
@@ -695,500 +617,35 @@
       }
     }
 
-    // Modal Presentation
+    async function submitUtr() {
+      const utr = document.getElementById('upiUtr').value.trim();
+      if (!utr || utr.length < 8) {
+        alert("Please enter a valid Transaction ID / UTR.");
+        return;
+      }
+      
+      try {
+        await db.collection('pending_upgrades').add({
+          userId: currentUserId,
+          email: currentUserEmailPrefix,
+          utr: utr,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Verification pending. Your star will appear shortly after we confirm the UTR.');
+        document.getElementById('paymentModal').remove();
+      } catch(err) {
+        console.error(err);
+        alert('Error submitting UTR. Please email support.');
+      }
+    }
+
     function handleBecomeMember() {
       toggleProfileDropdown();
       
       const modalHtml = `
         <div id="paymentModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(9, 11, 16, 0.85); backdrop-filter: blur(6px); z-index:2000; display:flex; align-items:center; justify-content:center;">
-          <div style="background:var(--surface); padding:32px 24px; border-radius:24px; border:1px solid var(--border); width:90%; max-width:400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);">
+          <div style="background:var(--surface); padding:32px 24px; border-radius:24px; border:1px solid var(--border); width:90%; max-width:400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); max-height: 90vh; overflow-y: auto;">
             
             <div style="text-align: center; margin-bottom: 24px;">
               <div style="font-size: 2.8rem; margin-bottom: 8px; line-height: 1;">⭐</div>
-              <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 6px; color: var(--text);">Golden Membership</h2>
-              <p style="font-size: 0.85rem; color: var(--text-muted);">Stand out in the cosmos and support the universe.</p>
-            </div>
-
-            <div style="background: rgba(0,0,0,0.25); border-radius: 16px; padding: 16px; margin-bottom: 24px;">
-              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                <span style="font-size: 1.1rem;">✨</span>
-                <span style="font-size: 0.88rem; color: var(--text);">Exclusive <strong>Golden Star</strong> badge</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                <span style="font-size: 1.1rem;">🚀</span>
-                <span style="font-size: 0.88rem; color: var(--text);"><strong>Priority ranking</strong> in the global feed</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 1.1rem;">💖</span>
-                <span style="font-size: 0.88rem; color: var(--text);">Support platform development</span>
-              </div>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-              <div>
-                <p style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">For Indian Users (UPI / Cards)</p>
-                <button onclick="startRazorpay()" style="width: 100%; background: #3395FF; color: #fff; border: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: opacity 0.2s;">
-                  Pay ₹89 via Razorpay
-                </button>
-              </div>
-
-              <div class="divider" style="margin: 4px 0;"></div>
-
-              <div>
-                <p style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">For International Users (USD)</p>
-                <div id="paypal-button-container"></div>
-              </div>
-            </div>
-
-            <button onclick="document.getElementById('paymentModal').remove()" style="margin-top:20px; width: 100%; background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size: 0.88rem; padding: 8px;">Maybe Later</button>
-          </div>
-        </div>
-      `;
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-      paypal.Buttons({
-        style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
-        createOrder: function(data, actions) {
-          return actions.order.create({
-            purchase_units: [{
-              amount: { value: '1.00' },
-              description: 'MindCosmos Golden Membership',
-              custom_id: currentUserId 
-            }]
-          });
-        },
-        onApprove: function(data, actions) {
-          return actions.order.capture().then(function(details) {
-            alert("Payment successful! Your star is being minted...");
-            document.getElementById('paymentModal').remove();
-            setTimeout(() => { location.reload(); }, 2500); 
-          });
-        },
-        onError: function(err) {
-          console.error("PayPal Error:", err);
-          alert("Payment process failed. Please try again.");
-        }
-      }).render('#paypal-button-container');
-    }
-
-    // Razorpay Integration
-    function startRazorpay() {
-      const options = {
-        "key": "YOUR_RAZORPAY_KEY", 
-        "amount": "8900", 
-        "currency": "INR",
-        "name": "MindCosmos",
-        "description": "Golden Membership Pass",
-        "handler": function (response) {
-          alert("Payment successful! Your star is being minted...");
-          const modal = document.getElementById('paymentModal');
-          if (modal) modal.remove();
-          setTimeout(() => { location.reload(); }, 2500);
-        },
-        "notes": {
-          "custom_id": currentUserId 
-        },
-        "theme": {
-          "color": "#3b82f6"
-        }
-      };
-      
-      const rzp = new Razorpay(options);
-      rzp.on('payment.failed', function (response){
-        console.error("Razorpay Error:", response.error.description);
-        alert("Payment failed or cancelled. Please try again.");
-      });
-      rzp.open();
-    }
-
-    // 4. Professional Authentication Flow
-    function showError(message) {
-      alertBox.innerText = message;
-      alertBox.style.display = 'block';
-    }
-
-    function hideError() {
-      alertBox.style.display = 'none';
-      alertBox.innerText = '';
-    }
-
-    function toggleAuthMode() {
-      isSignUpMode = !isSignUpMode;
-      hideError();
-      
-      const title = isSignUpMode ? "Join the Universe" : "A safe space to cast your thoughts into the universe. Sign in to continue.";
-      document.getElementById('authSubtitle').innerText = title;
-      document.getElementById('authSubmitBtn').innerText = isSignUpMode ? "Create Account" : "Sign In";
-      document.getElementById('authToggleBtn').innerHTML = isSignUpMode ? "Already have an account? <strong>Sign In</strong>" : "Need an account? <strong>Sign Up</strong>";
-      
-      document.getElementById('forgotPasswordBtn').style.display = isSignUpMode ? 'none' : 'block';
-    }
-
-    function resetToSignIn() {
-      document.getElementById('authSuccessState').style.display = 'none';
-      document.getElementById('authFormArea').style.display = 'block';
-      
-      // Reset inputs & flip back to sign in
-      document.getElementById('authEmail').value = '';
-      document.getElementById('authPassword').value = '';
-      if (isSignUpMode) toggleAuthMode();
-    }
-
-    function setAuthLoading(isLoading) {
-      const btn = document.getElementById('authSubmitBtn');
-      const googleBtn = document.getElementById('googleAuthBtn');
-      const emailInput = document.getElementById('authEmail');
-      const passInput = document.getElementById('authPassword');
-
-      btn.disabled = isLoading;
-      googleBtn.disabled = isLoading;
-      emailInput.disabled = isLoading;
-      passInput.disabled = isLoading;
-
-      if (isLoading) {
-        btn.innerText = isSignUpMode ? "Creating account..." : "Signing in...";
-      } else {
-        btn.innerText = isSignUpMode ? "Create Account" : "Sign In";
-      }
-    }
-
-    async function handleAuthSubmit() {
-      const email = document.getElementById('authEmail').value.trim();
-      const password = document.getElementById('authPassword').value.trim();
-      
-      hideError();
-
-      if (!email || !password) {
-        showError("Please enter both email and password.");
-        return;
-      }
-
-      setAuthLoading(true);
-
-      try {
-        if (isSignUpMode) {
-          // SIGN UP
-          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-          
-          // NEW: Create the user profile in Firestore database immediately
-          await db.collection('users').doc(userCredential.user.uid).set({
-            email: email,
-            isMember: false,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-
-          await userCredential.user.sendEmailVerification();
-          await auth.signOut();
-          
-          // Switch to Modern Success State
-          document.getElementById('authFormArea').style.display = 'none';
-          document.getElementById('sentEmailSpan').innerText = email;
-          document.getElementById('authSuccessState').style.display = 'flex';
-          
-        } else {
-          // SIGN IN
-          const userCredential = await auth.signInWithEmailAndPassword(email, password);
-          if (!userCredential.user.emailVerified) {
-            await auth.signOut();
-            showError("Your email has not been verified yet. Please check your inbox.");
-          }
-        }
-      } catch (err) {
-        // Professional Custom Error Mapping
-        let message = "Something went wrong. Please try again.";
-        
-        if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-          message = "We couldn't find an account with that email and password. Please check your details or sign up.";
-        } else if (err.code === 'auth/wrong-password') {
-          message = "Incorrect password. Please try again.";
-        } else if (err.code === 'auth/email-already-in-use') {
-          message = "An account with this email already exists. Please sign in instead.";
-        } else if (err.code === 'auth/weak-password') {
-          message = "Your password is too weak. It must be at least 6 characters long.";
-        } else if (err.code === 'auth/invalid-email') {
-          message = "Please enter a valid email address.";
-        } else if (err.code === 'auth/too-many-requests') {
-          message = "Too many attempts. Please wait a moment and try again.";
-        }
-        showError(message);
-      } finally {
-        setAuthLoading(false);
-      }
-    }
-
-    const googleProvider = new firebase.auth.GoogleAuthProvider();
-
-    async function handleGoogleSignIn() {
-      hideError();
-      setAuthLoading(true);
-      try {
-        const userCredential = await auth.signInWithPopup(googleProvider);
-        
-        // NEW: Ensure Google users have a database profile too (merge: true ensures we don't overwrite paid members)
-        await db.collection('users').doc(userCredential.user.uid).set({
-          email: userCredential.user.email,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-
-      } catch (err) {
-        if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
-          showError("Google sign-in failed. Please try again or use your email.");
-        }
-      } finally {
-        setAuthLoading(false);
-      }
-    }
-
-    async function handleForgotPassword() {
-      const email = document.getElementById('authEmail').value.trim();
-      hideError();
-
-      if (!email) {
-        showError("Please enter your email address in the box first to reset your password.");
-        return;
-      }
-
-      setAuthLoading(true);
-      try {
-        await auth.sendPasswordResetEmail(email);
-        alert(`A password reset link has been sent to ${email}.`);
-      } catch (err) {
-        showError("Error sending reset email. Please ensure the email is typed correctly.");
-      } finally {
-        setAuthLoading(false);
-      }
-    }
-
-    function handleSignOut() {
-      if (confirm("Are you sure you want to sign out?")) {
-        auth.signOut();
-      }
-    }
-
-    // 5. App Functionality
-    function scrollFilters(amount) { document.getElementById('filterBar').scrollBy({ left: amount, behavior: 'smooth' }); }
-    function scrollPicker(amount) { document.getElementById('emotionPicker').scrollBy({ left: amount, behavior: 'smooth' }); }
-
-    let currentFilter = 'All';
-    let allQuestionsCache = [];
-    let userInteractedQuestionIds = new Set();
-    let unsubscribeFeed = null;
-
-    function setFilter(filterType, element) {
-      currentFilter = filterType;
-      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-      element.classList.add('active');
-      renderFeed();
-    }
-
-    function timeAgo(date) {
-      if (!date) return 'just now';
-      const seconds = Math.floor((new Date() - date) / 1000);
-      if (seconds < 60) return `${Math.max(1, seconds)}s ago`;
-      const minutes = Math.floor(seconds / 60);
-      if (minutes < 60) return `${minutes}m ago`;
-      const hours = Math.floor(minutes / 60);
-      if (hours < 24) return `${hours}h ago`;
-      return `${Math.floor(hours / 24)}d ago`;
-    }
-
-    function listenToFeed() {
-      const feedContainer = document.getElementById('feedContainer');
-      if (unsubscribeFeed) unsubscribeFeed();
-
-      unsubscribeFeed = db.collection('questions')
-        .orderBy('createdAt', 'desc')
-        .limit(100)
-        .onSnapshot(async snapshot => {
-          allQuestionsCache = [];
-          userInteractedQuestionIds.clear();
-          
-          let fetchedItems = [];
-          let authorIdsToFetch = new Set();
-
-          snapshot.forEach(doc => {
-            const item = doc.data();
-            item.id = doc.id;
-            fetchedItems.push(item);
-            if (item.authorId) authorIdsToFetch.add(item.authorId);
-          });
-
-          for (let uId of authorIdsToFetch) {
-            if (userMembershipsCache[uId] === undefined) {
-              try {
-                const uDoc = await db.collection('users').doc(uId).get();
-                userMembershipsCache[uId] = (uDoc.exists && uDoc.data().isMember === true);
-              } catch (e) {
-                userMembershipsCache[uId] = false;
-              }
-            }
-          }
-
-          for (let item of fetchedItems) {
-            try {
-              const ansSnap = await db.collection('questions').doc(item.id).collection('answers')
-                .where('authorId', '==', currentUserId)
-                .get();
-              if (!ansSnap.empty) userInteractedQuestionIds.add(item.id);
-            } catch (err) {
-              console.error(err);
-            }
-          }
-
-          allQuestionsCache = fetchedItems;
-          renderFeed();
-        }, err => {
-          console.error(err);
-          feedContainer.innerHTML = `<div class="empty-state">Unable to load feed. Check Firestore Rules.</div>`;
-        });
-    }
-
-    function renderFeed() {
-      const feedContainer = document.getElementById('feedContainer');
-      feedContainer.innerHTML = '';
-      let visibleCount = 0;
-
-      let sortedItems = [...allQuestionsCache].sort((a, b) => {
-        const aMember = userMembershipsCache[a.authorId] ? 1 : 0;
-        const bMember = userMembershipsCache[b.authorId] ? 1 : 0;
-        if (aMember !== bMember) {
-          return bMember - aMember;
-        }
-        const timeA = a.createdAt ? a.createdAt.toMillis() : 0;
-        const timeB = b.createdAt ? b.createdAt.toMillis() : 0;
-        return timeB - timeA;
-      });
-
-      sortedItems.forEach(item => {
-        if (currentFilter === 'MyFeed' && item.authorId !== currentUserId && !userInteractedQuestionIds.has(item.id)) return;
-        if (currentFilter !== 'All' && currentFilter !== 'MyFeed' && item.emotion !== currentFilter) return;
-
-        visibleCount++;
-        feedContainer.appendChild(createCardElement(item));
-      });
-
-      if (visibleCount === 0) {
-        feedContainer.innerHTML = `<div class="empty-state">${currentFilter === 'MyFeed' ? "Your feed is empty. Release a thought or answer someone." : "No thoughts found in this space yet."}</div>`;
-      }
-    }
-
-    function createCardElement(data) {
-      const card = document.createElement('div');
-      card.className = 'card';
-      const dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
-      const rawEmotion = data.emotion || 'lost';
-      const emotionClass = `badge-${rawEmotion.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-      const isOwner = data.authorId === currentUserId;
-      const isMemberAuthor = userMembershipsCache[data.authorId] === true;
-
-      card.innerHTML = `
-        <div class="card-header">
-          <span class="badge ${emotionClass}">${escapeHtml(data.emotion || 'Thought')} ${isMemberAuthor ? '<span class="member-star">⭐</span>' : ''}</span>
-          <span class="card-time">${timeAgo(dateObj)}</span>
-        </div>
-        <div class="card-question">${escapeHtml(data.text)}</div>
-        <div class="card-actions">
-          <button class="btn-toggle-replies" onclick="toggleReplies('${data.id}')">💬 <span id="reply-count-${data.id}">${data.replyCount || 0}</span> answers</button>
-          ${isOwner ? `<button class="btn-delete-card" onclick="handleDeleteQuestion('${data.id}')" title="Delete thought">🗑️</button>` : ''}
-        </div>
-        <div class="replies-section" id="replies-${data.id}">
-          <div class="replies-list" id="replies-list-${data.id}"><div style="font-size:0.75rem; color:var(--text-muted);">Loading...</div></div>
-          <div class="reply-input-box">
-            <input type="text" id="input-${data.id}" placeholder="Provide clarity or comfort..." maxlength="200" onkeydown="if(event.key==='Enter') submitReply('${data.id}')">
-            <button class="btn-submit-reply" onclick="submitReply('${data.id}')">Answer</button>
-          </div>
-        </div>
-      `;
-      return card;
-    }
-
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
-
-    async function handleDeleteQuestion(qId) {
-      if (!confirm("Delete this thought?")) return;
-      try { await db.collection('questions').doc(qId).delete(); } catch (err) { alert("Failed to delete."); }
-    }
-
-    async function handleDeleteReply(qId, ansId) {
-      if (!confirm("Delete your answer?")) return;
-      try {
-        const qRef = db.collection('questions').doc(qId);
-        await qRef.collection('answers').doc(ansId).delete();
-        await qRef.update({ replyCount: firebase.firestore.FieldValue.increment(-1) });
-        userInteractedQuestionIds.delete(qId);
-        renderFeed();
-      } catch (err) { alert("Failed to delete answer."); }
-    }
-
-    const activeReplyListeners = {};
-    function toggleReplies(qId) {
-      const section = document.getElementById(`replies-${qId}`);
-      if (section.classList.contains('open')) {
-        section.classList.remove('open');
-        if (activeReplyListeners[qId]) { activeReplyListeners[qId](); delete activeReplyListeners[qId]; }
-      } else {
-        section.classList.add('open');
-        loadReplies(qId);
-      }
-    }
-
-    function loadReplies(qId) {
-      const list = document.getElementById(`replies-list-${qId}`);
-      activeReplyListeners[qId] = db.collection('questions').doc(qId).collection('answers')
-        .orderBy('createdAt', 'asc').onSnapshot(snap => {
-          if (snap.empty) { list.innerHTML = `<div style="font-size:0.75rem; color:var(--text-muted);">No answers yet.</div>`; return; }
-          list.innerHTML = '';
-          snap.forEach(doc => {
-            const reply = doc.data();
-            const dateObj = reply.createdAt ? reply.createdAt.toDate() : new Date();
-            const el = document.createElement('div');
-            el.className = 'reply-bubble';
-            el.innerHTML = `
-              <div class="reply-content"><div>${escapeHtml(reply.text)}</div><div class="reply-time">${timeAgo(dateObj)}</div></div>
-              ${reply.authorId === currentUserId ? `<button class="btn-delete-reply" onclick="handleDeleteReply('${qId}', '${doc.id}')">🗑️</button>` : ''}
-            `;
-            list.appendChild(el);
-          });
-        });
-    }
-
-    async function handlePostQuestion() {
-      const input = document.getElementById('questionInput');
-      const text = input.value.trim();
-      const emotion = document.querySelector('input[name="emotion"]:checked')?.value || 'Happy';
-      const postBtn = document.getElementById('postBtn');
-
-      if (!text) return;
-      postBtn.disabled = true; postBtn.innerText = 'Releasing...';
-
-      try {
-        await db.collection('questions').add({
-          text: text, emotion: emotion, authorId: currentUserId, replyCount: 0,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        input.value = '';
-      } catch (err) { alert("Failed to submit."); }
-      finally { postBtn.disabled = false; postBtn.innerText = 'Release'; }
-    }
-
-    async function submitReply(qId) {
-      const input = document.getElementById(`input-${qId}`);
-      const text = input.value.trim();
-      if (!text) return;
-      input.value = '';
-
-      try {
-        const qRef = db.collection('questions').doc(qId);
-        await qRef.collection('answers').add({ text: text, authorId: currentUserId, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        await qRef.update({ replyCount: firebase.firestore.FieldValue.increment(1) });
-        userInteractedQuestionIds.add(qId);
-        renderFeed();
-      } catch (err) { console.error(err); }
-    }
-  </script>
-</body>
-</html>
+              <h2 style="font-size: 1.35rem; font-weight
