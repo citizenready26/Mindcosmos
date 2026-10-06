@@ -395,8 +395,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-  <!-- PayPal SDK -->
-  <script src="https://www.paypal.com/sdk/js?client-id=BAAYyWY_lWDrmmXHvj3qW_fT2LVjnTxxcMrL0QmBdfMgNbRwB0Sv4yILn_eVVYjxJ-54-4oyeS-P-G2H8I&currency=USD"></script>
+  <!-- PayPal SDK (with your exact Client ID) -->
+  <script src="https://www.paypal.com/sdk/js?client-id=BAAYyWY_IWDnmXHvj3qW_tTZLVjn1xxcMrL0QWBdfMgNbRwB0Sv4ylLn_eVVYjxJ-54-4oyeS-P-G2HB1&currency=USD"></script>
 </head>
 <body>
 
@@ -634,10 +634,17 @@
     }
 
     async function submitUtr() {
+      const utrBtn = document.querySelector('button[onclick="submitUtr()"]');
       const utr = document.getElementById('upiUtr').value.trim();
+      
       if (!utr || utr.length < 8) {
         alert("Please enter a valid Transaction ID / UTR.");
         return;
+      }
+      
+      if (utrBtn) {
+        utrBtn.innerText = "Submitting...";
+        utrBtn.disabled = true;
       }
       
       try {
@@ -647,12 +654,30 @@
           utr: utr,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-        alert('Verification pending. Your star will appear shortly after we confirm the UTR.');
-        const modal = document.getElementById('paymentModal');
-        if (modal) modal.remove();
+        
+        const modalContainer = document.querySelector('#paymentModal > div');
+        if (modalContainer) {
+          modalContainer.innerHTML = `
+            <div style="text-align: center; padding: 24px 8px;">
+              <div style="font-size: 3.5rem; margin-bottom: 16px;">⏳</div>
+              <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; color: var(--text);">Upgrade Pending</h2>
+              <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 28px;">
+                Your UTR has been securely received.<br><br>
+                Our team will verify the transaction and activate your <strong>Golden Star</strong> within 24 hours.
+              </p>
+              <button onclick="document.getElementById('paymentModal').remove()" style="width: 100%; background: var(--text); color: var(--bg); border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 0.95rem; transition: opacity 0.2s;">
+                Return to Cosmos
+              </button>
+            </div>
+          `;
+        }
       } catch(err) {
         console.error(err);
-        alert('Error submitting UTR. Please email support.');
+        alert('Error submitting UTR. Please try again or email support.');
+        if (utrBtn) {
+          utrBtn.innerText = "Submit UTR for Verification";
+          utrBtn.disabled = false;
+        }
       }
     }
 
@@ -670,53 +695,36 @@
             <div style="text-align: center; margin-bottom: 24px;">
               <div style="font-size: 2.8rem; margin-bottom: 8px; line-height: 1;">⭐</div>
               <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 6px; color: var(--text);">Golden Membership</h2>
-              <p style="font-size: 0.85rem; color: var(--text-muted);">Stand out in the cosmos and support the universe.</p>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Priority ranking & exclusive badge.</p>
             </div>
 
-            <div style="background: rgba(0,0,0,0.25); border-radius: 16px; padding: 16px; margin-bottom: 24px;">
-              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                <span style="font-size: 1.1rem;">✨</span>
-                <span style="font-size: 0.88rem; color: var(--text);">Exclusive <strong>Golden Star</strong> badge</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                <span style="font-size: 1.1rem;">🚀</span>
-                <span style="font-size: 0.88rem; color: var(--text);"><strong>Priority ranking</strong> in the global feed</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 1.1rem;">💖</span>
-                <span style="font-size: 0.88rem; color: var(--text);">Support platform development</span>
+            <!-- PAYMENT TABS -->
+            <div style="display: flex; gap: 4px; margin-bottom: 16px; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 12px; border: 1px solid var(--border);">
+              <button id="tab-upi" onclick="document.getElementById('upi-section').style.display='block'; document.getElementById('paypal-section').style.display='none'; this.style.background='var(--surface)'; this.style.color='var(--text)'; document.getElementById('tab-paypal').style.background='transparent'; document.getElementById('tab-paypal').style.color='var(--text-muted)';" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: 0.2s;">🇮🇳 UPI (₹89)</button>
+              
+              <button id="tab-paypal" onclick="document.getElementById('upi-section').style.display='none'; document.getElementById('paypal-section').style.display='block'; this.style.background='var(--surface)'; this.style.color='var(--text)'; document.getElementById('tab-upi').style.background='transparent'; document.getElementById('tab-upi').style.color='var(--text-muted)'; document.getElementById('tab-upi').style.border='none';" style="flex: 1; padding: 10px; border-radius: 10px; border: none; background: transparent; color: var(--text-muted); font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: 0.2s;">🌍 PayPal ($1)</button>
+            </div>
+
+            <!-- UPI SECTION (DEFAULT) -->
+            <div id="upi-section" style="display: block;">
+              <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; text-align: center; border: 1px solid var(--border);">
+                <a href="upi://pay?pa=priyankhudehingia@oksbi&pn=MindCosmos&am=89.00&cu=INR&tn=GoldenStar" 
+                   style="display: block; background: #10b981; color: #000; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                   📲 Tap to Pay via UPI App
+                </a>
+                <img src="qr.jpeg" style="width: 130px; height: 130px; border-radius: 8px; margin-bottom: 8px; border: 2px solid #fff; object-fit: cover;" alt="UPI QR">
+                <p style="font-size: 0.8rem; color: #3b82f6; margin-bottom: 16px; font-weight: 600;">priyankhudehingia@oksbi</p>
+                
+                <input type="text" id="upiUtr" placeholder="Enter 12-digit UTR No." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; margin-bottom: 12px; text-align: center; font-size: 0.9rem;">
+                <button onclick="submitUtr()" style="width: 100%; background: var(--text); color: var(--bg); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                  Submit UTR for Verification
+                </button>
               </div>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-              <div>
-                <p style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">For Indian Users (₹89 via UPI)</p>
-                <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; text-align: center; border: 1px solid var(--border);">
-                  <p style="font-size: 0.85rem; margin-bottom: 12px; color: var(--text);">Scan or tap to pay</p>
-                  
-                  <!-- DYNAMIC UPI BUTTON FOR MOBILE USERS -->
-                  <a href="upi://pay?pa=priyankhudehingia@oksbi&pn=MindCosmos&am=89.00&cu=INR&tn=GoldenStar" 
-                     style="display: block; background: #10b981; color: #000; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                     📲 Tap to Pay via UPI App
-                  </a>
-                  
-                  <img src="qr.jpeg" style="width: 140px; height: 140px; border-radius: 8px; margin-bottom: 8px; border: 2px solid #fff; object-fit: cover;" alt="UPI QR">
-                  
-                  <p style="font-size: 0.8rem; color: #3b82f6; margin-bottom: 16px; font-weight: 600;">priyankhudehingia@oksbi</p>
-                  
-                  <input type="text" id="upiUtr" placeholder="Enter 12-digit UTR No." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; margin-bottom: 12px; text-align: center; font-size: 0.9rem;">
-                  <button onclick="submitUtr()" style="width: 100%; background: var(--text); color: var(--bg); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer;">
-                    Submit UTR for Verification
-                  </button>
-                </div>
-              </div>
-
-              <div class="divider" style="margin: 8px 0;"></div>
-
-              <div>
-                <p style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">For International Users ($1.00 USD)</p>
-                <div id="paypal-button-container"></div>
-              </div>
+            <!-- PAYPAL SECTION (HIDDEN BY DEFAULT) -->
+            <div id="paypal-section" style="display: none; padding: 16px 0;">
+              <div id="paypal-button-container"></div>
             </div>
 
             <button onclick="document.getElementById('paymentModal').remove()" style="margin-top:20px; width: 100%; background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size: 0.88rem; padding: 8px;">Maybe Later</button>
@@ -1041,7 +1049,7 @@
         <div class="card-question">${escapeHtml(data.text)}</div>
         <div class="card-actions">
           <button class="btn-toggle-replies" onclick="toggleReplies('${data.id}')">💬 <span id="reply-count-${data.id}">${data.replyCount || 0}</span> answers</button>
-          ${isOwner ? `<button class="btn-delete-card" onclick="handleDeleteQuestion('${data.id}')" title="Delete thought">🗑️</button>` : ''}
+          ${isOwner ? `<button class="btn-delete-card" onclick="handleDeleteQuestion('${data.id}')" title="Delete thought">🗑</button>` : ''}
         </div>
         <div class="replies-section" id="replies-${data.id}">
           <div class="replies-list" id="replies-list-${data.id}"><div style="font-size:0.75rem; color:var(--text-muted);">Loading...</div></div>
@@ -1120,7 +1128,7 @@
             el.className = 'reply-bubble';
             el.innerHTML = `
               <div class="reply-content"><div>${escapeHtml(reply.text)}</div><div class="reply-time">${timeAgo(dateObj)}</div></div>
-              ${reply.authorId === currentUserId ? `<button class="btn-delete-reply" onclick="handleDeleteReply('${qId}', '${doc.id}')">🗑️</button>` : ''}
+              ${reply.authorId === currentUserId ? `<button class="btn-delete-reply" onclick="handleDeleteReply('${qId}', '${doc.id}')">🗑️️</button>` : ''}
             `;
             list.appendChild(el);
           });
