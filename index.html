@@ -394,14 +394,11 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
-  <!-- PayPal SDK (with your exact Client ID) -->
-  <script src="https://www.paypal.com/sdk/js?client-id=BAAYyWY_lWDrmmXHvj3qW_fT2LVjnTxxcMrL0QmBdfMgNbRwB0Sv4yILn_eVVYjxJ-54-4oyeS-P-G2H8I1&currency=USD"></script>
 </head>
 <body>
 
   <!-- ==============================================
-       GATEKEEPER: WELCOME & AUTH SCREEN (Clean)
+       GATEKEEPER: WELCOME & AUTH SCREEN
        ============================================== -->
   <div id="welcomeScreen">
     <div class="auth-card">
@@ -535,7 +532,7 @@
   </div>
 
   <script>
-    // 1. All Global State Variables (Hoisted Cleanly)
+    // 1. All Global State Variables
     let currentUserId = null;
     let currentUserEmailPrefix = '';
     let isSignUpMode = false;
@@ -565,7 +562,7 @@
     const mainApp = document.getElementById('mainApp');
     const alertBox = document.getElementById('authAlertBox');
 
-    // 3. Auth Observer (Direct Entry - No Email Verification Blocker)
+    // 3. Auth Observer
     auth.onAuthStateChanged(async user => {
       if (user) { 
         currentUserId = user.uid;
@@ -626,7 +623,6 @@
         }
       } catch (err) {
         console.error("Membership check error:", err);
-        // FIX: Force ad to display even if read fails due to rules
         userMembershipsCache[uid] = false;
         const adBanner = document.getElementById('premiumAdBanner');
         if (adBanner) adBanner.style.display = 'flex';
@@ -634,10 +630,17 @@
     }
 
     async function submitUtr() {
+      const utrBtn = document.querySelector('button[onclick="submitUtr()"]');
       const utr = document.getElementById('upiUtr').value.trim();
+      
       if (!utr || utr.length < 8) {
         alert("Please enter a valid Transaction ID / UTR.");
         return;
+      }
+      
+      if (utrBtn) {
+        utrBtn.innerText = "Submitting...";
+        utrBtn.disabled = true;
       }
       
       try {
@@ -647,22 +650,48 @@
           utr: utr,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-        alert('Verification pending. Your star will appear shortly after we confirm the UTR.');
-        const modal = document.getElementById('paymentModal');
-        if (modal) modal.remove();
+        
+        const modalContainer = document.querySelector('#paymentModal > div');
+        if (modalContainer) {
+          modalContainer.innerHTML = `
+            <div style="text-align: center; padding: 24px 8px;">
+              <div style="font-size: 3.5rem; margin-bottom: 16px;">⏳</div>
+              <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; color: var(--text);">Upgrade Pending</h2>
+              <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 28px;">
+                Your UTR has been securely received.<br><br>
+                Our team will verify the transaction and activate your <strong>Golden Star</strong> within 24 hours.
+              </p>
+              <button onclick="document.getElementById('paymentModal').remove()" style="width: 100%; background: var(--text); color: var(--bg); border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 0.95rem; transition: opacity 0.2s;">
+                Return to Cosmos
+              </button>
+            </div>
+          `;
+        }
       } catch(err) {
         console.error(err);
-        alert('Error submitting UTR. Please email support.');
+        alert('Error submitting UTR. Please try again or email support.');
+        if (utrBtn) {
+          utrBtn.innerText = "Submit UTR for Verification";
+          utrBtn.disabled = false;
+        }
       }
     }
 
+    // ==============================================================
+    // PASTE YOUR NEW PAYPAL CLIENT ID BETWEEN THE QUOTES BELOW
+    // ==============================================================
+    const CLIENT_ID = "BAAPBgAGV8ceqij394Pt0XfiVa-zdzpjxmA0laDfJ1tIB9ZjRvosuE-Xpenpecy1Re5MOCGFtAQcNFWoRc";
+    // ==============================================================
+
+
+    // Dynamic Safe Loading Payment Flow
     function handleBecomeMember() {
       const existingMenu = document.getElementById('profileDropdown');
       if (existingMenu) existingMenu.classList.remove('show');
-
+      
       const existingModal = document.getElementById('paymentModal');
       if (existingModal) existingModal.remove();
-      
+
       const modalHtml = `
         <div id="paymentModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(9, 11, 16, 0.85); backdrop-filter: blur(6px); z-index:2000; display:flex; align-items:center; justify-content:center;">
           <div style="background:var(--surface); padding:32px 24px; border-radius:24px; border:1px solid var(--border); width:90%; max-width:400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); max-height: 90vh; overflow-y: auto;">
@@ -688,36 +717,30 @@
               </div>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-              <div>
-                <p style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">For Indian Users (₹89 via UPI)</p>
-                <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; text-align: center; border: 1px solid var(--border);">
-                  
-                  <p style="font-size: 0.85rem; margin-bottom: 12px; color: var(--text);">Scan or tap to pay</p>
+            <!-- PAYPAL TOP SECTION -->
+            <div style="margin-bottom: 10px; text-align: center;">
+              <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px;">FOR INTERNATIONAL USERS ($1.00)</span>
+            </div>
+            
+            <div id="paypal-button-container" style="margin-bottom: 24px; min-height: 45px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border-radius: 8px;">
+               <span style="font-size: 0.85rem; color: var(--text-muted);">Loading secure checkout...</span>
+            </div>
 
-                  <!-- DYNAMIC UPI BUTTON FOR MOBILE USERS -->
-                  <a href="upi://pay?pa=priyankhudehingia@oksbi&pn=MindCosmos&am=89.00&cu=INR&tn=GoldenStar" 
-                     style="display: block; background: #10b981; color: #000; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                     📲 Tap to Pay via UPI App
-                  </a>
-                  
-                  <img src="qr.jpeg" style="width: 140px; height: 140px; border-radius: 8px; margin-bottom: 8px; border: 2px solid #fff; object-fit: cover;" alt="UPI QR">
-                  
-                  <p style="font-size: 0.8rem; color: #3b82f6; margin-bottom: 16px; font-weight: 600;">priyankhudehingia@oksbi</p>
-                  
-                  <input type="text" id="upiUtr" placeholder="Enter 12-digit UTR No." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; margin-bottom: 12px; text-align: center; font-size: 0.9rem;">
-                  <button onclick="submitUtr()" style="width: 100%; background: var(--text); color: var(--bg); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer;">
-                    Submit UTR for Verification
-                  </button>
-                </div>
-              </div>
-
-              <div class="divider" style="margin: 8px 0;"></div>
-
-              <div>
-                <p style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">For International Users ($1.00 USD)</p>
-                <div id="paypal-button-container"></div>
-              </div>
+            <!-- UPI BOTTOM SECTION -->
+            <div style="margin-bottom: 10px; text-align: center;">
+              <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px;">FOR INDIAN USERS (₹89 VIA UPI)</span>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; text-align: center; border: 1px solid var(--border);">
+              <a href="upi://pay?pa=priyankhudehingia@oksbi&pn=MindCosmos&am=89.00&cu=INR&tn=GoldenStar" 
+                 style="display: block; background: #10b981; color: #000; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                 📲 Tap to Pay via UPI App
+              </a>
+              <img src="qr.jpeg" style="width: 130px; height: 130px; border-radius: 8px; margin-bottom: 8px; border: 2px solid #fff; object-fit: cover;" alt="UPI QR">
+              <p style="font-size: 0.8rem; color: #3b82f6; margin-bottom: 16px; font-weight: 600;">priyankhudehingia@oksbi</p>
+              <input type="text" id="upiUtr" placeholder="Enter 12-digit UTR No." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; margin-bottom: 12px; text-align: center; font-size: 0.9rem;">
+              <button onclick="submitUtr()" style="width: 100%; background: var(--text); color: var(--bg); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                Submit UTR for Verification
+              </button>
             </div>
 
             <button onclick="document.getElementById('paymentModal').remove()" style="margin-top:20px; width: 100%; background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size: 0.88rem; padding: 8px;">Maybe Later</button>
@@ -726,44 +749,50 @@
       `;
       document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-      // Safe PayPal Initializer
-      if (window.paypal && typeof paypal.Buttons === 'function') {
+      const paypalContainer = document.getElementById('paypal-button-container');
+
+      // Function to actually render the buttons
+      function renderPayPalButtons() {
+        paypalContainer.innerHTML = ''; 
         try {
           paypal.Buttons({
             style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
             createOrder: function(data, actions) {
               return actions.order.create({
-                purchase_units: [{
-                  amount: { value: '1.00' },
-                  description: 'MindCosmos Golden Membership',
-                  custom_id: currentUserId 
-                }]
+                purchase_units: [{ amount: { value: '1.00' }, description: 'MindCosmos Golden Membership', custom_id: currentUserId }]
               });
             },
             onApprove: function(data, actions) {
               return actions.order.capture().then(async function(details) {
                 try {
-                  await db.collection('users').doc(currentUserId).update({
-                    isMember: true
-                  });
+                  await db.collection('users').doc(currentUserId).update({ isMember: true });
                   alert("Payment successful! Your star is minted.");
-                  const modal = document.getElementById('paymentModal');
-                  if (modal) modal.remove();
+                  document.getElementById('paymentModal')?.remove();
                   location.reload(); 
-                } catch (err) {
-                  console.error("Upgrade error:", err);
-                  alert("Payment recorded! If star does not appear immediately, refresh.");
-                }
+                } catch (err) { alert("Payment recorded! If star does not appear immediately, refresh."); }
               });
             },
-            onError: function(err) {
-              console.error("PayPal Error:", err);
-              alert("Payment process failed. Please try again.");
-            }
-          }).render('#paypal-button-container');
+            onError: function(err) { alert("Payment process failed. Please try again."); }
+          }).render('#paypal-button-container').catch(err => {
+            console.error("PayPal Render Error:", err);
+            paypalContainer.innerHTML = `<div style="color: #f87171; font-size: 0.8rem; text-align: center; padding: 8px;">PayPal Blocked.<br>Check Adblocker, VPN, or Client ID.</div>`;
+          });
         } catch(e) {
-          console.warn("PayPal initialization fallback:", e);
+          paypalContainer.innerHTML = `<div style="color: #f87171; font-size: 0.8rem; text-align: center; padding: 8px;">Error loading PayPal.</div>`;
         }
+      }
+
+      // Dynamically inject the script ONLY when the button is clicked
+      if (!window.paypal) {
+        const script = document.createElement('script');
+        script.src = `https://www.paypal.com/sdk/js?client-id=${CLIENT_ID}&currency=USD`;
+        script.onload = () => renderPayPalButtons();
+        script.onerror = () => {
+          paypalContainer.innerHTML = `<div style="color: #f87171; font-size: 0.85rem; text-align: center; padding: 12px; border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; background: rgba(239,68,68,0.1);">Failed to load PayPal network.<br>Please disable your adblocker.</div>`;
+        };
+        document.head.appendChild(script);
+      } else {
+        renderPayPalButtons();
       }
     }
 
@@ -948,7 +977,6 @@
             if (item.authorId) authorIdsToFetch.add(item.authorId);
           });
 
-          // Fetch member statuses
           for (let uId of authorIdsToFetch) {
             if (userMembershipsCache[uId] === undefined) {
               try {
@@ -961,9 +989,8 @@
           }
 
           allQuestionsCache = fetchedItems;
-          renderFeed(); // Render instantly
+          renderFeed(); 
 
-          // Background check for user interactions
           for (let item of fetchedItems) {
             db.collection('questions').doc(item.id).collection('answers')
               .where('authorId', '==', currentUserId)
@@ -1030,7 +1057,6 @@
       const isOwner = data.authorId === currentUserId;
       const isMemberAuthor = (userMembershipsCache[data.authorId] === true);
 
-      // Star positioned cleanly OUTSIDE the emotion badge
       card.innerHTML = `
         <div class="card-header">
           <div style="display: flex; align-items: center; gap: 6px;">
@@ -1042,7 +1068,7 @@
         <div class="card-question">${escapeHtml(data.text)}</div>
         <div class="card-actions">
           <button class="btn-toggle-replies" onclick="toggleReplies('${data.id}')">💬 <span id="reply-count-${data.id}">${data.replyCount || 0}</span> answers</button>
-          ${isOwner ? `<button class="btn-delete-card" onclick="handleDeleteQuestion('${data.id}')" title="Delete thought">🗑️️</button>` : ''}
+          ${isOwner ? `<button class="btn-delete-card" onclick="handleDeleteQuestion('${data.id}')" title="Delete thought">🗑</button>` : ''}
         </div>
         <div class="replies-section" id="replies-${data.id}">
           <div class="replies-list" id="replies-list-${data.id}"><div style="font-size:0.75rem; color:var(--text-muted);">Loading...</div></div>
@@ -1121,7 +1147,7 @@
             el.className = 'reply-bubble';
             el.innerHTML = `
               <div class="reply-content"><div>${escapeHtml(reply.text)}</div><div class="reply-time">${timeAgo(dateObj)}</div></div>
-              ${reply.authorId === currentUserId ? `<button class="btn-delete-reply" onclick="handleDeleteReply('${qId}', '${doc.id}')">🗑️</button>` : ''}
+              ${reply.authorId === currentUserId ? `<button class="btn-delete-reply" onclick="handleDeleteReply('${qId}', '${doc.id}')">🗑</button>` : ''}
             `;
             list.appendChild(el);
           });
