@@ -443,7 +443,7 @@
           <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
           <a href="refunds.html" style="color: var(--text-muted); text-decoration: none;">Refunds</a>
         </div>
-        <span>Support: inmindcosmos@gmail.com</span>
+        <span>Support: priyankhudehingia@gmail.com</span>
       </div>
     </div>
   </div>
@@ -574,7 +574,7 @@
         const badge = document.getElementById('authBadgeText');
         if (badge) badge.innerHTML = `<span>👤 ${currentUserEmailPrefix} ▾</span>`;
         
-        await checkUserMembership(currentUserId);
+        checkUserMembership(currentUserId);
         listenToFeed(); 
       } else {
         currentUserId = null;
@@ -601,32 +601,35 @@
       }
     });
 
-    async function checkUserMembership(uid) {
-      try {
-        const doc = await db.collection('users').doc(uid).get();
-        if (doc.exists && doc.data().isMember) {
-          userMembershipsCache[uid] = true;
+    function checkUserMembership(uid) {
+      // Real-time listener: updates instantly when you edit Firestore
+      db.collection('users').doc(uid).onSnapshot(doc => {
+        const data = doc.exists ? doc.data() : null;
+        
+        // This handles both boolean (true) and string ("true") safely
+        const isMember = data && (data.isMember === true || data.isMember === "true");
 
-          const memberBtn = document.querySelector('.member-tier');
+        userMembershipsCache[uid] = isMember;
+
+        const memberBtn = document.querySelector('.member-tier');
+        const adBanner = document.getElementById('premiumAdBanner');
+
+        if (isMember) {
           if (memberBtn) {
             memberBtn.innerHTML = '⭐ Golden Member Active';
             memberBtn.onclick = null;
             memberBtn.style.cursor = 'default';
           }
-          
-          const adBanner = document.getElementById('premiumAdBanner');
           if (adBanner) adBanner.style.display = 'none';
         } else {
-          userMembershipsCache[uid] = false;
-          const adBanner = document.getElementById('premiumAdBanner');
           if (adBanner) adBanner.style.display = 'flex';
         }
-      } catch (err) {
+
+        // Re-render the feed so star badges instantly appear on their posts
+        renderFeed();
+      }, err => {
         console.error("Membership check error:", err);
-        userMembershipsCache[uid] = false;
-        const adBanner = document.getElementById('premiumAdBanner');
-        if (adBanner) adBanner.style.display = 'flex';
-      }
+      });
     }
 
     async function submitUtr() {
@@ -680,7 +683,7 @@
     // ==============================================================
     // PASTE YOUR NEW PAYPAL CLIENT ID BETWEEN THE QUOTES BELOW
     // ==============================================================
-    const CLIENT_ID = "BAAPBgAGV8ceqij394Pt0XfiVa-zdzpjxmA0laDfJ1tIB9ZjRvosuE-Xpenpecy1Re5MOCGFtAQcNFWoRc";
+    const CLIENT_ID = "YOUR_NEW_LIVE_CLIENT_ID_HERE";
     // ==============================================================
 
 
