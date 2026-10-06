@@ -56,9 +56,6 @@
       align-items: center;
     }
 
-    /* -----------------------------------
-       Main Application
-       ----------------------------------- */
     #mainApp {
       display: flex; 
       width: 100%;
@@ -104,7 +101,6 @@
     .brand-subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
     .brand-subtitle span { color: #ffffff; font-weight: 600; }
 
-    /* Profile Dropdown */
     .profile-dropdown-container { position: relative; }
     
     .auth-badge {
@@ -153,7 +149,6 @@
     .dropdown-item:hover { background: var(--surface-hover); }
     .dropdown-item.member-tier { color: #facc15; font-weight: 600; border-bottom: 1px solid var(--border); }
 
-    /* Composer */
     .composer { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 24px; transition: border-color 0.2s; }
     .composer:focus-within { border-color: rgba(59, 130, 246, 0.5); }
     .composer textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-size: 0.98rem; line-height: 1.5; resize: none; min-height: 72px; }
@@ -182,7 +177,6 @@
     .btn-post:hover:not(:disabled) { opacity: 0.9; }
     .btn-post:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* Feed & Cards */
     .feed { display: flex; flex-direction: column; gap: 14px; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; transition: background 0.15s, border-color 0.15s; }
     .card:hover { border-color: rgba(255, 255, 255, 0.12); }
@@ -225,16 +219,12 @@
     .empty-state { text-align: center; padding: 48px 16px; color: var(--text-muted); font-size: 0.9rem; }
   </style>
 
-  <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-  <!-- ==============================================
-       MAIN APPLICATION (DIRECTLY LOADED)
-       ============================================== -->
   <div id="mainApp">
     
     <header>
@@ -246,7 +236,7 @@
         
         <div class="profile-dropdown-container">
           <div class="auth-badge" onclick="toggleProfileDropdown()" id="authBadgeText">
-            <span>👤 Guest Cosmos</span>
+            <span>👤 Connecting...</span>
           </div>
           <div class="dropdown-menu" id="profileDropdown">
             <button class="dropdown-item member-tier" onclick="handleBecomeMember()">⭐ Become a Member</button>
@@ -257,7 +247,6 @@
 
     <div class="app-container">
       
-      <!-- Minimal Inside Banner -->
       <div id="premiumAdBanner" style="display: none; background: linear-gradient(145deg, rgba(250, 204, 21, 0.1) 0%, rgba(245, 158, 11, 0.02) 100%); border: 1px solid rgba(250, 204, 21, 0.3); border-radius: 16px; padding: 14px 18px; margin-bottom: 24px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
         <div>
           <h3 style="color: #facc15; font-size: 0.95rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">⭐ Get the Golden Star</h3>
@@ -315,7 +304,6 @@
   </div>
 
   <script>
-    // 1. All Global State Variables
     let currentUserId = null;
     let userMembershipsCache = {};
     let currentFilter = 'All';
@@ -324,7 +312,6 @@
     let unsubscribeFeed = null;
     let activeReplyListeners = {};
 
-    // 2. Firebase Initialization
     const firebaseConfig = {
       apiKey: "AIzaSyC_jtZZWz6h9qMAZa7nsNX-pdzt6qjyIno",
       authDomain: "inmind-8e8fb.firebaseapp.com",
@@ -339,15 +326,22 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 3. Silent Anonymous Auth on Load
+    // FIXED: Properly handle the incognito silent-failure
     auth.onAuthStateChanged(async user => {
       if (user) { 
         currentUserId = user.uid;
+        
+        // Show visually that they successfully connected
+        const badge = document.getElementById('authBadgeText');
+        if (badge) badge.innerHTML = `<span>👤 Guest ${user.uid.substring(0,4)}</span>`;
+        
         checkUserMembership(currentUserId);
         listenToFeed(); 
       } else {
         auth.signInAnonymously().catch(err => {
           console.error("Anonymous auth failed:", err);
+          const feed = document.getElementById('feedContainer');
+          if (feed) feed.innerHTML = `<div class="empty-state" style="color: #f87171;">Failed to connect. If you are in Incognito mode, your browser is blocking the anonymous session. Please try a normal window!</div>`;
         });
       }
     });
@@ -545,7 +539,6 @@
       }
     }
 
-    // 4. App Feed & Interactivity
     function scrollFilters(amount) { document.getElementById('filterBar').scrollBy({ left: amount, behavior: 'smooth' }); }
     function scrollPicker(amount) { document.getElementById('emotionPicker').scrollBy({ left: amount, behavior: 'smooth' }); }
 
@@ -706,7 +699,7 @@
         await db.collection('questions').doc(qId).delete(); 
       } catch (err) { 
         console.error("Delete error:", err);
-        alert("Failed to delete."); 
+        alert("Failed to delete. Error: " + err.message); 
       }
     }
 
@@ -719,7 +712,7 @@
         userInteractedQuestionIds.delete(qId);
         renderFeed();
       } catch (err) { 
-        alert("Failed to delete answer."); 
+        alert("Failed to delete answer. Error: " + err.message); 
       }
     }
 
@@ -773,6 +766,7 @@
         });
     }
 
+    // FIXED: Let the user know if their browser blocked the silent login
     async function handlePostQuestion() {
       const input = document.getElementById('questionInput');
       const text = input.value.trim();
@@ -780,6 +774,13 @@
       const postBtn = document.getElementById('postBtn');
 
       if (!text) return;
+
+      // Fail-safe check
+      if (!currentUserId) {
+        alert("Your connection to the cosmos was blocked! Try closing Incognito mode or allowing third-party cookies.");
+        return;
+      }
+
       postBtn.disabled = true; 
       postBtn.innerText = 'Releasing...';
 
@@ -793,7 +794,7 @@
         });
         input.value = '';
       } catch (err) { 
-        alert("Failed to submit."); 
+        alert("Failed to submit. Error: " + err.message); 
       } finally { 
         postBtn.disabled = false; 
         postBtn.innerText = 'Release'; 
@@ -804,6 +805,12 @@
       const input = document.getElementById(`input-${qId}`);
       const text = input.value.trim();
       if (!text) return;
+
+      if (!currentUserId) {
+        alert("Connection blocked by browser. Try a normal window!");
+        return;
+      }
+
       input.value = '';
 
       try {
@@ -813,11 +820,13 @@
           authorId: currentUserId, 
           createdAt: firebase.firestore.FieldValue.serverTimestamp() 
         });
+        // This is what failed earlier without the 'allow update' rule!
         await qRef.update({ replyCount: firebase.firestore.FieldValue.increment(1) });
         userInteractedQuestionIds.add(qId);
         renderFeed();
       } catch (err) { 
         console.error("Reply error:", err); 
+        alert("Failed to answer. Error: " + err.message);
       }
     }
   </script>
