@@ -1091,9 +1091,19 @@
     async function handleDeleteQuestion(qId) {
       if (!confirm("Delete this thought?")) return;
       try { 
+        // 1. Catch all the ghost replies hiding in the subcollection
+        const answersSnapshot = await db.collection('questions').doc(qId).collection('answers').get();
+        
+        // 2. Delete all replies first using a batch
+        const batch = db.batch();
+        answersSnapshot.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+
+        // 3. Finally, delete the main thought itself
         await db.collection('questions').doc(qId).delete(); 
       } catch (err) { 
-        alert("Failed to delete."); 
+        console.error("Delete error:", err);
+        alert("Failed to delete. Please try again."); 
       }
     }
 
@@ -1143,10 +1153,17 @@
             if (reply.createdAt && typeof reply.createdAt.toDate === 'function') {
               dateObj = reply.createdAt.toDate();
             }
+            
+            // Check if the person replying is a Golden Member
+            const isReplyMember = userMembershipsCache[reply.authorId] === true;
+            
             const el = document.createElement('div');
             el.className = 'reply-bubble';
             el.innerHTML = `
-              <div class="reply-content"><div>${escapeHtml(reply.text)}</div><div class="reply-time">${timeAgo(dateObj)}</div></div>
+              <div class="reply-content">
+                <div>${isReplyMember ? '<span style="font-size: 0.85rem;" title="Golden Member">⭐</span> ' : ''}${escapeHtml(reply.text)}</div>
+                <div class="reply-time">${timeAgo(dateObj)}</div>
+              </div>
               ${reply.authorId === currentUserId ? `<button class="btn-delete-reply" onclick="handleDeleteReply('${qId}', '${doc.id}')">🗑</button>` : ''}
             `;
             list.appendChild(el);
