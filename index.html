@@ -680,7 +680,7 @@
       }
     }
 
-    // Stacked Layout: Benefits -> PayPal (Top) -> UPI (Bottom)
+    // Fully Reverted Stacked Payment Flow WITH Robust PayPal Loading
     function handleBecomeMember() {
       const existingMenu = document.getElementById('profileDropdown');
       if (existingMenu) existingMenu.classList.remove('show');
@@ -698,7 +698,7 @@
               <p style="font-size: 0.85rem; color: var(--text-muted);">Stand out in the cosmos and support the universe.</p>
             </div>
 
-            <!-- BENEFITS LIST -->
+            <!-- RESTORED BENEFITS LIST -->
             <div style="background: rgba(0,0,0,0.25); border-radius: 16px; padding: 16px; margin-bottom: 24px;">
               <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                 <span style="font-size: 1.1rem;">✨</span>
@@ -718,7 +718,11 @@
             <div style="margin-bottom: 10px; text-align: center;">
               <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px;">FOR INTERNATIONAL USERS ($1.00)</span>
             </div>
-            <div id="paypal-button-container" style="margin-bottom: 24px;"></div>
+            
+            <!-- PayPal Container with built-in loading text to prevent blank holes -->
+            <div id="paypal-button-container" style="margin-bottom: 24px; min-height: 45px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border-radius: 8px;">
+               <span style="font-size: 0.85rem; color: var(--text-muted);">Loading PayPal securely...</span>
+            </div>
 
             <!-- INDIAN USERS: UPI (BELOW PAYPAL) -->
             <div style="margin-bottom: 10px; text-align: center;">
@@ -743,9 +747,14 @@
       `;
       document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-      // Render PayPal directly into the visible container
+      // Safe, Bulletproof PayPal Initializer
+      const paypalContainer = document.getElementById('paypal-button-container');
+      
       if (window.paypal && typeof paypal.Buttons === 'function') {
         try {
+          // Clear the loading text just before drawing the button
+          paypalContainer.innerHTML = ''; 
+          
           paypal.Buttons({
             style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
             createOrder: function(data, actions) {
@@ -777,10 +786,16 @@
               console.error("PayPal Error:", err);
               alert("Payment process failed. Please try again.");
             }
-          }).render('#paypal-button-container');
+          }).render('#paypal-button-container').catch(err => {
+            // This catches the exact crash causing your blank space
+            console.error("PayPal Render Error:", err);
+            paypalContainer.innerHTML = `<div style="color: #f87171; font-size: 0.8rem; text-align: center; padding: 8px;">PayPal Blocked.<br>Check Adblocker, VPN, or Client ID.</div>`;
+          });
         } catch(e) {
-          console.warn("PayPal initialization fallback:", e);
+          paypalContainer.innerHTML = `<div style="color: #f87171; font-size: 0.8rem; text-align: center; padding: 8px;">Error loading PayPal.</div>`;
         }
+      } else {
+        paypalContainer.innerHTML = `<div style="color: #f87171; font-size: 0.8rem; text-align: center; padding: 8px;">PayPal SDK Blocked by Browser.<br>Please turn off your Adblocker.</div>`;
       }
     }
 
@@ -965,6 +980,7 @@
             if (item.authorId) authorIdsToFetch.add(item.authorId);
           });
 
+          // Fetch member statuses
           for (let uId of authorIdsToFetch) {
             if (userMembershipsCache[uId] === undefined) {
               try {
@@ -977,8 +993,9 @@
           }
 
           allQuestionsCache = fetchedItems;
-          renderFeed();
+          renderFeed(); // Render instantly
 
+          // Background check for user interactions
           for (let item of fetchedItems) {
             db.collection('questions').doc(item.id).collection('answers')
               .where('authorId', '==', currentUserId)
@@ -1045,6 +1062,7 @@
       const isOwner = data.authorId === currentUserId;
       const isMemberAuthor = (userMembershipsCache[data.authorId] === true);
 
+      // Star positioned cleanly OUTSIDE the emotion badge
       card.innerHTML = `
         <div class="card-header">
           <div style="display: flex; align-items: center; gap: 6px;">
