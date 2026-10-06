@@ -48,7 +48,9 @@
       align-items: center;
     }
 
-    /* Welcome / Auth Screen */
+    /* -----------------------------------
+       Welcome / Auth Screen
+       ----------------------------------- */
     #welcomeScreen {
       display: flex;
       flex-direction: column;
@@ -219,7 +221,9 @@
     }
     .auth-link:hover { color: var(--text); }
 
-    /* Main Application */
+    /* -----------------------------------
+       Main Application
+       ----------------------------------- */
     #mainApp {
       display: none; 
       width: 100%;
@@ -265,7 +269,7 @@
     .brand-subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
     .brand-subtitle span { color: #ffffff; font-weight: 600; }
 
-    /* Profile Dropdown Menu */
+    /* Profile Dropdown */
     .profile-dropdown-container { position: relative; }
     
     .auth-badge {
@@ -314,6 +318,7 @@
     .dropdown-item:hover { background: var(--surface-hover); }
     .dropdown-item.member-tier { color: #facc15; font-weight: 600; border-bottom: 1px solid var(--border); }
 
+    /* Composer */
     .composer { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 24px; transition: border-color 0.2s; }
     .composer:focus-within { border-color: rgba(59, 130, 246, 0.5); }
     .composer textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-size: 0.98rem; line-height: 1.5; resize: none; min-height: 72px; }
@@ -342,6 +347,7 @@
     .btn-post:hover:not(:disabled) { opacity: 0.9; }
     .btn-post:disabled { opacity: 0.4; cursor: not-allowed; }
 
+    /* Feed & Cards */
     .feed { display: flex; flex-direction: column; gap: 14px; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; transition: background 0.15s, border-color 0.15s; }
     .card:hover { border-color: rgba(255, 255, 255, 0.12); }
@@ -356,7 +362,7 @@
     .badge-angry { color: var(--tag-angry); background: rgba(236, 72, 153, 0.12); }
     .badge-numb { color: var(--tag-numb); background: rgba(100, 116, 139, 0.12); }
     .badge-hopeful { color: var(--tag-hopeful); background: rgba(16, 185, 129, 0.12); }
-    .badge-cant-explain { color: var(--tag-unexplainable); background: rgba(56, 189, 248, 0.12); }
+    .badge-cant-explain { color: var(--tag-cant-explain); background: rgba(56, 189, 248, 0.12); }
 
     .card-time { font-size: 0.75rem; color: var(--text-muted); }
     .card-question { font-size: 0.96rem; line-height: 1.5; color: var(--text); margin-bottom: 14px; white-space: pre-wrap; word-break: break-word; }
@@ -389,16 +395,15 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-  <!-- PayPal SDK (Make sure this is your LIVE Client ID) -->
+  <!-- PayPal SDK -->
   <script src="https://www.paypal.com/sdk/js?client-id=BAAYBEl7apEtdKFkGH7pZqmc-q0VNQDSJf5mmABauI9udXXk9bsL53wXw57gOzQgqrza-aMmRVhytP2Ifk&currency=USD"></script>
 </head>
 <body>
 
   <!-- ==============================================
-       GATEKEEPER: WELCOME & AUTH SCREEN
+       GATEKEEPER: WELCOME & AUTH SCREEN (Clean)
        ============================================== -->
   <div id="welcomeScreen">
-    
     <div class="auth-card">
       <div class="auth-brand-title"><span class="mind">Mind</span><span class="cosmos">Cosmos</span></div>
       
@@ -447,7 +452,7 @@
   </div>
 
   <!-- ==============================================
-       MAIN APPLICATION (Hidden until authenticated)
+       MAIN APPLICATION
        ============================================== -->
   <div id="mainApp">
     
@@ -472,13 +477,13 @@
 
     <div class="app-container">
       
-      <!-- New Minimal, Price-Free Banner -->
-      <div id="premiumAdBanner" style="display: none; background: linear-gradient(145deg, rgba(250, 204, 21, 0.1) 0%, rgba(245, 158, 11, 0.02) 100%); border: 1px solid rgba(250, 204, 21, 0.3); border-radius: 16px; padding: 16px 20px; margin-bottom: 24px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+      <!-- Minimal Inside Banner -->
+      <div id="premiumAdBanner" style="display: none; background: linear-gradient(145deg, rgba(250, 204, 21, 0.1) 0%, rgba(245, 158, 11, 0.02) 100%); border: 1px solid rgba(250, 204, 21, 0.3); border-radius: 16px; padding: 14px 18px; margin-bottom: 24px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
         <div>
           <h3 style="color: #facc15; font-size: 0.95rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">⭐ Get the Golden Star</h3>
           <p style="color: var(--text-muted); font-size: 0.8rem;">Priority ranking & exclusive badge.</p>
         </div>
-        <button onclick="handleBecomeMember()" style="background: #facc15; color: #000; border: none; padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap; transition: transform 0.2s;">
+        <button onclick="handleBecomeMember()" style="background: #facc15; color: #000; border: none; padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap;">
           Become a Member
         </button>
       </div>
@@ -530,7 +535,18 @@
   </div>
 
   <script>
-    // 1. Firebase Initialization
+    // 1. All Global State Variables (Hoisted Cleanly)
+    let currentUserId = null;
+    let currentUserEmailPrefix = '';
+    let isSignUpMode = false;
+    let userMembershipsCache = {};
+    let currentFilter = 'All';
+    let allQuestionsCache = [];
+    let userInteractedQuestionIds = new Set();
+    let unsubscribeFeed = null;
+    let activeReplyListeners = {};
+
+    // 2. Firebase Initialization
     const firebaseConfig = {
       apiKey: "AIzaSyC_jtZZWz6h9qMAZa7nsNX-pdzt6qjyIno",
       authDomain: "inmind-8e8fb.firebaseapp.com",
@@ -545,25 +561,21 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 2. DOM Elements & State
     const welcomeScreen = document.getElementById('welcomeScreen');
     const mainApp = document.getElementById('mainApp');
     const alertBox = document.getElementById('authAlertBox');
-    
-    let currentUserId = null;
-    let currentUserEmailPrefix = '';
-    let isSignUpMode = false;
-    let userMembershipsCache = {};
 
-    // 3. Auth State Observer (The Gatekeeper)
+    // 3. Auth Observer (Direct Entry - No Email Verification Blocker)
     auth.onAuthStateChanged(async user => {
       if (user) { 
         currentUserId = user.uid;
-        currentUserEmailPrefix = user.email.split('@')[0];
+        currentUserEmailPrefix = (user.email ? user.email.split('@')[0] : 'Cosmic');
+        
         welcomeScreen.style.display = 'none';
         mainApp.style.display = 'flex';
         
-        document.getElementById('authBadgeText').innerHTML = `<span>👤 ${currentUserEmailPrefix} ▾</span>`;
+        const badge = document.getElementById('authBadgeText');
+        if (badge) badge.innerHTML = `<span>👤 ${currentUserEmailPrefix} ▾</span>`;
         
         await checkUserMembership(currentUserId);
         listenToFeed(); 
@@ -582,12 +594,13 @@
 
     function toggleProfileDropdown() {
       const menu = document.getElementById('profileDropdown');
-      menu.classList.toggle('show');
+      if (menu) menu.classList.toggle('show');
     }
 
     window.addEventListener('click', function(e) {
       if (!e.target.closest('.profile-dropdown-container')) {
-        document.getElementById('profileDropdown')?.classList.remove('show');
+        const menu = document.getElementById('profileDropdown');
+        if (menu) menu.classList.remove('show');
       }
     });
 
@@ -606,14 +619,13 @@
           
           const adBanner = document.getElementById('premiumAdBanner');
           if (adBanner) adBanner.style.display = 'none';
-
         } else {
           userMembershipsCache[uid] = false;
           const adBanner = document.getElementById('premiumAdBanner');
           if (adBanner) adBanner.style.display = 'flex';
         }
       } catch (err) {
-        console.error(err);
+        console.error("Membership check error:", err);
       }
     }
 
@@ -632,7 +644,8 @@
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         alert('Verification pending. Your star will appear shortly after we confirm the UTR.');
-        document.getElementById('paymentModal').remove();
+        const modal = document.getElementById('paymentModal');
+        if (modal) modal.remove();
       } catch(err) {
         console.error(err);
         alert('Error submitting UTR. Please email support.');
@@ -640,7 +653,11 @@
     }
 
     function handleBecomeMember() {
-      toggleProfileDropdown();
+      const existingMenu = document.getElementById('profileDropdown');
+      if (existingMenu) existingMenu.classList.remove('show');
+
+      const existingModal = document.getElementById('paymentModal');
+      if (existingModal) existingModal.remove();
       
       const modalHtml = `
         <div id="paymentModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(9, 11, 16, 0.85); backdrop-filter: blur(6px); z-index:2000; display:flex; align-items:center; justify-content:center;">
@@ -648,4 +665,505 @@
             
             <div style="text-align: center; margin-bottom: 24px;">
               <div style="font-size: 2.8rem; margin-bottom: 8px; line-height: 1;">⭐</div>
-              <h2 style="font-size: 1.35rem; font-weight
+              <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 6px; color: var(--text);">Golden Membership</h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Stand out in the cosmos and support the universe.</p>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.25); border-radius: 16px; padding: 16px; margin-bottom: 24px;">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <span style="font-size: 1.1rem;">✨</span>
+                <span style="font-size: 0.88rem; color: var(--text);">Exclusive <strong>Golden Star</strong> badge</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <span style="font-size: 1.1rem;">🚀</span>
+                <span style="font-size: 0.88rem; color: var(--text);"><strong>Priority ranking</strong> in the global feed</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 1.1rem;">💖</span>
+                <span style="font-size: 0.88rem; color: var(--text);">Support platform development</span>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              <div>
+                <p style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">For Indian Users (₹89 via UPI)</p>
+                <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; text-align: center; border: 1px solid var(--border);">
+                  <p style="font-size: 0.85rem; margin-bottom: 12px; color: var(--text);">Scan via GPay/PhonePe/Paytm</p>
+                  
+                  <img src="YOUR_UPI_QR_CODE_IMAGE_LINK.jpg" style="width: 140px; height: 140px; border-radius: 8px; margin-bottom: 8px; border: 2px solid #fff; object-fit: cover;" alt="UPI QR">
+                  
+                  <p style="font-size: 0.8rem; color: #3b82f6; margin-bottom: 16px; font-weight: 600;">yourname@bank</p>
+                  
+                  <input type="text" id="upiUtr" placeholder="Enter 12-digit UTR No." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; margin-bottom: 12px; text-align: center; font-size: 0.9rem;">
+                  <button onclick="submitUtr()" style="width: 100%; background: var(--text); color: var(--bg); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                    Submit UTR for Verification
+                  </button>
+                </div>
+              </div>
+
+              <div class="divider" style="margin: 8px 0;"></div>
+
+              <div>
+                <p style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">For International Users ($1.00 USD)</p>
+                <div id="paypal-button-container"></div>
+              </div>
+            </div>
+
+            <button onclick="document.getElementById('paymentModal').remove()" style="margin-top:20px; width: 100%; background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size: 0.88rem; padding: 8px;">Maybe Later</button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+      // Safe PayPal Initializer
+      if (window.paypal && typeof paypal.Buttons === 'function') {
+        try {
+          paypal.Buttons({
+            style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
+            createOrder: function(data, actions) {
+              return actions.order.create({
+                purchase_units: [{
+                  amount: { value: '1.00' },
+                  description: 'MindCosmos Golden Membership',
+                  custom_id: currentUserId 
+                }]
+              });
+            },
+            onApprove: function(data, actions) {
+              return actions.order.capture().then(async function(details) {
+                try {
+                  await db.collection('users').doc(currentUserId).update({
+                    isMember: true
+                  });
+                  alert("Payment successful! Your star is minted.");
+                  const modal = document.getElementById('paymentModal');
+                  if (modal) modal.remove();
+                  location.reload(); 
+                } catch (err) {
+                  console.error("Upgrade error:", err);
+                  alert("Payment recorded! If star does not appear immediately, refresh.");
+                }
+              });
+            },
+            onError: function(err) {
+              console.error("PayPal Error:", err);
+              alert("Payment process failed. Please try again.");
+            }
+          }).render('#paypal-button-container');
+        } catch(e) {
+          console.warn("PayPal initialization fallback:", e);
+        }
+      }
+    }
+
+    // 4. Authentication Flow
+    function showError(message) {
+      if (alertBox) {
+        alertBox.innerText = message;
+        alertBox.style.display = 'block';
+      }
+    }
+
+    function hideError() {
+      if (alertBox) {
+        alertBox.style.display = 'none';
+        alertBox.innerText = '';
+      }
+    }
+
+    function toggleAuthMode() {
+      isSignUpMode = !isSignUpMode;
+      hideError();
+      
+      const title = isSignUpMode ? "Join the Universe" : "A safe space to cast your thoughts into the universe. Sign in to continue.";
+      document.getElementById('authSubtitle').innerText = title;
+      document.getElementById('authSubmitBtn').innerText = isSignUpMode ? "Create Account" : "Sign In";
+      document.getElementById('authToggleBtn').innerHTML = isSignUpMode ? "Already have an account? <strong>Sign In</strong>" : "Need an account? <strong>Sign Up</strong>";
+      
+      const forgotBtn = document.getElementById('forgotPasswordBtn');
+      if (forgotBtn) forgotBtn.style.display = isSignUpMode ? 'none' : 'block';
+    }
+
+    function setAuthLoading(isLoading) {
+      const btn = document.getElementById('authSubmitBtn');
+      const googleBtn = document.getElementById('googleAuthBtn');
+      const emailInput = document.getElementById('authEmail');
+      const passInput = document.getElementById('authPassword');
+
+      if (btn) btn.disabled = isLoading;
+      if (googleBtn) googleBtn.disabled = isLoading;
+      if (emailInput) emailInput.disabled = isLoading;
+      if (passInput) passInput.disabled = isLoading;
+
+      if (btn) {
+        btn.innerText = isLoading ? (isSignUpMode ? "Creating account..." : "Signing in...") : (isSignUpMode ? "Create Account" : "Sign In");
+      }
+    }
+
+    async function handleAuthSubmit() {
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value.trim();
+      
+      hideError();
+
+      if (!email || !password) {
+        showError("Please enter both email and password.");
+        return;
+      }
+
+      setAuthLoading(true);
+
+      try {
+        if (isSignUpMode) {
+          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+          try {
+            await db.collection('users').doc(userCredential.user.uid).set({
+              email: email,
+              isMember: false,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          } catch(dbErr) {
+            console.warn("Profile init warning:", dbErr);
+          }
+        } else {
+          await auth.signInWithEmailAndPassword(email, password);
+        }
+      } catch (err) {
+        let message = "Something went wrong. Please try again.";
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+          message = "We couldn't find an account with that email and password.";
+        } else if (err.code === 'auth/wrong-password') {
+          message = "Incorrect password. Please try again.";
+        } else if (err.code === 'auth/email-already-in-use') {
+          message = "An account with this email already exists. Please sign in instead.";
+        } else if (err.code === 'auth/weak-password') {
+          message = "Your password must be at least 6 characters long.";
+        } else if (err.code === 'auth/invalid-email') {
+          message = "Please enter a valid email address.";
+        } else if (err.code === 'auth/too-many-requests') {
+          message = "Too many attempts. Please wait a moment.";
+        }
+        showError(message);
+      } finally {
+        setAuthLoading(false);
+      }
+    }
+
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+    async function handleGoogleSignIn() {
+      hideError();
+      setAuthLoading(true);
+      try {
+        const userCredential = await auth.signInWithPopup(googleProvider);
+        try {
+          await db.collection('users').doc(userCredential.user.uid).set({
+            email: userCredential.user.email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        } catch(e) {}
+      } catch (err) {
+        if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+          showError("Google sign-in failed. Please try again.");
+        }
+      } finally {
+        setAuthLoading(false);
+      }
+    }
+
+    async function handleForgotPassword() {
+      const email = document.getElementById('authEmail').value.trim();
+      hideError();
+
+      if (!email) {
+        showError("Please enter your email address in the box first.");
+        return;
+      }
+
+      setAuthLoading(true);
+      try {
+        await auth.sendPasswordResetEmail(email);
+        alert(`Password reset link sent to ${email}.`);
+      } catch (err) {
+        showError("Error sending reset email. Verify email is correct.");
+      } finally {
+        setAuthLoading(false);
+      }
+    }
+
+    function handleSignOut() {
+      if (confirm("Are you sure you want to sign out?")) {
+        auth.signOut();
+      }
+    }
+
+    // 5. App Feed & Interactivity
+    function scrollFilters(amount) { document.getElementById('filterBar').scrollBy({ left: amount, behavior: 'smooth' }); }
+    function scrollPicker(amount) { document.getElementById('emotionPicker').scrollBy({ left: amount, behavior: 'smooth' }); }
+
+    function setFilter(filterType, element) {
+      currentFilter = filterType;
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      element.classList.add('active');
+      renderFeed();
+    }
+
+    function timeAgo(date) {
+      if (!date) return 'just now';
+      const seconds = Math.floor((new Date() - date) / 1000);
+      if (seconds < 60) return `${Math.max(1, seconds)}s ago`;
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      return `${Math.floor(hours / 24)}d ago`;
+    }
+
+    function listenToFeed() {
+      const feedContainer = document.getElementById('feedContainer');
+      if (unsubscribeFeed) unsubscribeFeed();
+
+      unsubscribeFeed = db.collection('questions')
+        .orderBy('createdAt', 'desc')
+        .limit(100)
+        .onSnapshot(async snapshot => {
+          let fetchedItems = [];
+          let authorIdsToFetch = new Set();
+
+          snapshot.forEach(doc => {
+            const item = doc.data();
+            item.id = doc.id;
+            fetchedItems.push(item);
+            if (item.authorId) authorIdsToFetch.add(item.authorId);
+          });
+
+          // Fetch member statuses
+          for (let uId of authorIdsToFetch) {
+            if (userMembershipsCache[uId] === undefined) {
+              try {
+                const uDoc = await db.collection('users').doc(uId).get();
+                userMembershipsCache[uId] = (uDoc.exists && uDoc.data().isMember === true);
+              } catch (e) {
+                userMembershipsCache[uId] = false;
+              }
+            }
+          }
+
+          allQuestionsCache = fetchedItems;
+          renderFeed(); // Render instantly
+
+          // Background check for user interactions
+          for (let item of fetchedItems) {
+            db.collection('questions').doc(item.id).collection('answers')
+              .where('authorId', '==', currentUserId)
+              .get()
+              .then(ansSnap => {
+                if (!ansSnap.empty) userInteractedQuestionIds.add(item.id);
+              })
+              .catch(() => {});
+          }
+        }, err => {
+          console.error("Feed error:", err);
+          if (feedContainer) feedContainer.innerHTML = `<div class="empty-state">Unable to load thoughts. Please refresh.</div>`;
+        });
+    }
+
+    function renderFeed() {
+      const feedContainer = document.getElementById('feedContainer');
+      if (!feedContainer) return;
+      feedContainer.innerHTML = '';
+      let visibleCount = 0;
+
+      let sortedItems = [...allQuestionsCache].sort((a, b) => {
+        const aMember = userMembershipsCache[a.authorId] ? 1 : 0;
+        const bMember = userMembershipsCache[b.authorId] ? 1 : 0;
+        if (aMember !== bMember) return bMember - aMember;
+
+        let timeA = 0;
+        if (a.createdAt) {
+          timeA = typeof a.createdAt.toMillis === 'function' ? a.createdAt.toMillis() : (new Date(a.createdAt)).getTime();
+        }
+        let timeB = 0;
+        if (b.createdAt) {
+          timeB = typeof b.createdAt.toMillis === 'function' ? b.createdAt.toMillis() : (new Date(b.createdAt)).getTime();
+        }
+        return timeB - timeA;
+      });
+
+      sortedItems.forEach(item => {
+        if (currentFilter === 'MyFeed' && item.authorId !== currentUserId && !userInteractedQuestionIds.has(item.id)) return;
+        if (currentFilter !== 'All' && currentFilter !== 'MyFeed' && item.emotion !== currentFilter) return;
+
+        visibleCount++;
+        feedContainer.appendChild(createCardElement(item));
+      });
+
+      if (visibleCount === 0) {
+        feedContainer.innerHTML = `<div class="empty-state">${currentFilter === 'MyFeed' ? "Your feed is empty. Release a thought or answer someone." : "No thoughts found in this space yet."}</div>`;
+      }
+    }
+
+    function createCardElement(data) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      
+      let dateObj = new Date();
+      if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+        dateObj = data.createdAt.toDate();
+      } else if (data.createdAt) {
+        dateObj = new Date(data.createdAt);
+      }
+
+      const rawEmotion = data.emotion || 'Lost';
+      const emotionClass = `badge-${rawEmotion.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+      const isOwner = data.authorId === currentUserId;
+      const isMemberAuthor = (userMembershipsCache[data.authorId] === true);
+
+      // Star positioned cleanly OUTSIDE the emotion badge
+      card.innerHTML = `
+        <div class="card-header">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="badge ${emotionClass}">${escapeHtml(data.emotion || 'Thought')}</span>
+            ${isMemberAuthor ? '<span style="font-size: 0.95rem; cursor: default;" title="Golden Member">⭐</span>' : ''}
+          </div>
+          <span class="card-time">${timeAgo(dateObj)}</span>
+        </div>
+        <div class="card-question">${escapeHtml(data.text)}</div>
+        <div class="card-actions">
+          <button class="btn-toggle-replies" onclick="toggleReplies('${data.id}')">💬 <span id="reply-count-${data.id}">${data.replyCount || 0}</span> answers</button>
+          ${isOwner ? `<button class="btn-delete-card" onclick="handleDeleteQuestion('${data.id}')" title="Delete thought">🗑️</button>` : ''}
+        </div>
+        <div class="replies-section" id="replies-${data.id}">
+          <div class="replies-list" id="replies-list-${data.id}"><div style="font-size:0.75rem; color:var(--text-muted);">Loading...</div></div>
+          <div class="reply-input-box">
+            <input type="text" id="input-${data.id}" placeholder="Provide clarity or comfort..." maxlength="200" onkeydown="if(event.key==='Enter') submitReply('${data.id}')">
+            <button class="btn-submit-reply" onclick="submitReply('${data.id}')">Answer</button>
+          </div>
+        </div>
+      `;
+      return card;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    async function handleDeleteQuestion(qId) {
+      if (!confirm("Delete this thought?")) return;
+      try { 
+        await db.collection('questions').doc(qId).delete(); 
+      } catch (err) { 
+        alert("Failed to delete."); 
+      }
+    }
+
+    async function handleDeleteReply(qId, ansId) {
+      if (!confirm("Delete your answer?")) return;
+      try {
+        const qRef = db.collection('questions').doc(qId);
+        await qRef.collection('answers').doc(ansId).delete();
+        await qRef.update({ replyCount: firebase.firestore.FieldValue.increment(-1) });
+        userInteractedQuestionIds.delete(qId);
+        renderFeed();
+      } catch (err) { 
+        alert("Failed to delete answer."); 
+      }
+    }
+
+    function toggleReplies(qId) {
+      const section = document.getElementById(`replies-${qId}`);
+      if (!section) return;
+
+      if (section.classList.contains('open')) {
+        section.classList.remove('open');
+        if (activeReplyListeners[qId]) { 
+          activeReplyListeners[qId](); 
+          delete activeReplyListeners[qId]; 
+        }
+      } else {
+        section.classList.add('open');
+        loadReplies(qId);
+      }
+    }
+
+    function loadReplies(qId) {
+      const list = document.getElementById(`replies-list-${qId}`);
+      if (!list) return;
+
+      activeReplyListeners[qId] = db.collection('questions').doc(qId).collection('answers')
+        .orderBy('createdAt', 'asc').onSnapshot(snap => {
+          if (snap.empty) { 
+            list.innerHTML = `<div style="font-size:0.75rem; color:var(--text-muted);">No answers yet.</div>`; 
+            return; 
+          }
+          list.innerHTML = '';
+          snap.forEach(doc => {
+            const reply = doc.data();
+            let dateObj = new Date();
+            if (reply.createdAt && typeof reply.createdAt.toDate === 'function') {
+              dateObj = reply.createdAt.toDate();
+            }
+            const el = document.createElement('div');
+            el.className = 'reply-bubble';
+            el.innerHTML = `
+              <div class="reply-content"><div>${escapeHtml(reply.text)}</div><div class="reply-time">${timeAgo(dateObj)}</div></div>
+              ${reply.authorId === currentUserId ? `<button class="btn-delete-reply" onclick="handleDeleteReply('${qId}', '${doc.id}')">🗑️</button>` : ''}
+            `;
+            list.appendChild(el);
+          });
+        });
+    }
+
+    async function handlePostQuestion() {
+      const input = document.getElementById('questionInput');
+      const text = input.value.trim();
+      const emotion = document.querySelector('input[name="emotion"]:checked')?.value || 'Happy';
+      const postBtn = document.getElementById('postBtn');
+
+      if (!text) return;
+      postBtn.disabled = true; 
+      postBtn.innerText = 'Releasing...';
+
+      try {
+        await db.collection('questions').add({
+          text: text, 
+          emotion: emotion, 
+          authorId: currentUserId, 
+          replyCount: 0,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        input.value = '';
+      } catch (err) { 
+        alert("Failed to submit."); 
+      } finally { 
+        postBtn.disabled = false; 
+        postBtn.innerText = 'Release'; 
+      }
+    }
+
+    async function submitReply(qId) {
+      const input = document.getElementById(`input-${qId}`);
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+
+      try {
+        const qRef = db.collection('questions').doc(qId);
+        await qRef.collection('answers').add({ 
+          text: text, 
+          authorId: currentUserId, 
+          createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+        });
+        await qRef.update({ replyCount: firebase.firestore.FieldValue.increment(1) });
+        userInteractedQuestionIds.add(qId);
+        renderFeed();
+      } catch (err) { 
+        console.error("Reply error:", err); 
+      }
+    }
+  </script>
+</body>
+</html>
