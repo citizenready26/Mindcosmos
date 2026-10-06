@@ -57,183 +57,10 @@
     }
 
     /* -----------------------------------
-       Welcome / Auth Screen
-       ----------------------------------- */
-    #welcomeScreen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      width: 100%;
-      padding: 20px;
-      background: radial-gradient(circle at center, #11151f 0%, #090b10 100%);
-    }
-
-    .auth-card {
-      background: rgba(17, 21, 31, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 40px 32px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-      text-align: center;
-      position: relative;
-    }
-
-    .auth-brand-title {
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      margin-bottom: 8px;
-    }
-
-    .auth-brand-title .mind { color: #ffffff; }
-    .auth-brand-title .cosmos {
-      background: linear-gradient(180deg, #60a5fa 0%, #2563eb 50%, #1e3a8a 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .auth-subtitle {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-
-    .alert-box {
-      display: none;
-      background: var(--error-bg);
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      color: var(--error-text);
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 0.85rem;
-      text-align: left;
-      margin-bottom: 20px;
-      line-height: 1.4;
-    }
-
-    .auth-inputs {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      margin-bottom: 24px;
-      text-align: left;
-    }
-
-    .auth-inputs label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: -6px;
-    }
-
-    .auth-inputs input {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border);
-      padding: 14px 16px;
-      border-radius: 12px;
-      color: var(--text);
-      font-size: 0.95rem;
-      outline: none;
-      transition: all 0.2s;
-    }
-
-    .auth-inputs input:focus {
-      border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    
-    .auth-inputs input:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .btn-main-auth {
-      background: var(--text);
-      color: var(--bg);
-      border: none;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      transition: transform 0.1s, opacity 0.2s;
-    }
-
-    .btn-main-auth:hover:not(:disabled) { opacity: 0.9; }
-    .btn-main-auth:active:not(:disabled) { transform: scale(0.98); }
-    .btn-main-auth:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .divider {
-      display: flex;
-      align-items: center;
-      text-align: center;
-      margin: 16px 0;
-      color: var(--text-muted);
-      font-size: 0.8rem;
-    }
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      border-bottom: 1px solid var(--border);
-    }
-    .divider:not(:empty)::before { margin-right: .5em; }
-    .divider:not(:empty)::after { margin-left: .5em; }
-
-    .btn-google-auth {
-      background: #ffffff;
-      color: #000000;
-      border: none;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: transform 0.1s, opacity 0.2s;
-      margin-bottom: 16px;
-    }
-    .btn-google-auth:hover:not(:disabled) { opacity: 0.9; }
-    .btn-google-auth:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .auth-links {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .auth-link {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    .auth-link:hover { color: var(--text); }
-
-    /* -----------------------------------
        Main Application
        ----------------------------------- */
     #mainApp {
-      display: none; 
+      display: flex; 
       width: 100%;
       flex-direction: column;
       align-items: center;
@@ -406,58 +233,7 @@
 <body>
 
   <!-- ==============================================
-       GATEKEEPER: WELCOME & AUTH SCREEN
-       ============================================== -->
-  <div id="welcomeScreen">
-    <div class="auth-card">
-      <div class="auth-brand-title"><span class="mind">Mind</span><span class="cosmos">Cosmos</span></div>
-      
-      <div id="authFormArea">
-        <p class="auth-subtitle" id="authSubtitle">A safe space to cast your thoughts into the universe. Sign in to continue.</p>
-
-        <div class="alert-box" id="authAlertBox"></div>
-
-        <div class="auth-inputs">
-          <label for="authEmail">Email</label>
-          <input type="email" id="authEmail" placeholder="you@example.com">
-          
-          <label for="authPassword">Password</label>
-          <input type="password" id="authPassword" placeholder="••••••••">
-        </div>
-
-        <button class="btn-main-auth" id="authSubmitBtn" onclick="handleAuthSubmit()">Sign In</button>
-
-        <div class="divider">OR</div>
-
-        <button class="btn-google-auth" id="googleAuthBtn" onclick="handleGoogleSignIn()">
-          <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          Continue with Google
-        </button>
-
-        <div class="auth-links">
-          <button class="auth-link" id="forgotPasswordBtn" onclick="handleForgotPassword()">Forgot password?</button>
-          <button class="auth-link" id="authToggleBtn" onclick="toggleAuthMode()">Need an account? <strong>Sign Up</strong></button>
-        </div>
-      </div>
-
-      <div style="margin-top: 24px; font-size: 0.72rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px; align-items: center; border-top: 1px solid var(--border); padding-top: 16px;">
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
-          <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms & Conditions</a>
-          <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
-          <a href="refunds.html" style="color: var(--text-muted); text-decoration: none;">Refunds</a>
-        </div>
-        <span>Support: inmindcosmos@gmail.com</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==============================================
-       MAIN APPLICATION
+       MAIN APPLICATION (DIRECTLY LOADED)
        ============================================== -->
   <div id="mainApp">
     
@@ -470,11 +246,10 @@
         
         <div class="profile-dropdown-container">
           <div class="auth-badge" onclick="toggleProfileDropdown()" id="authBadgeText">
-            <span>👤 Account</span>
+            <span>👤 Guest Cosmos</span>
           </div>
           <div class="dropdown-menu" id="profileDropdown">
             <button class="dropdown-item member-tier" onclick="handleBecomeMember()">⭐ Become a Member</button>
-            <button class="dropdown-item" onclick="handleSignOut()">🚪 Sign Out</button>
           </div>
         </div>
       </div>
@@ -534,7 +309,7 @@
       </div>
 
       <div class="feed" id="feedContainer">
-        <div class="empty-state">Loading thoughts...</div>
+        <div class="empty-state">Connecting to the cosmos...</div>
       </div>
     </div>
   </div>
@@ -542,8 +317,6 @@
   <script>
     // 1. All Global State Variables
     let currentUserId = null;
-    let currentUserEmailPrefix = '';
-    let isSignUpMode = false;
     let userMembershipsCache = {};
     let currentFilter = 'All';
     let allQuestionsCache = [];
@@ -566,34 +339,17 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    const welcomeScreen = document.getElementById('welcomeScreen');
-    const mainApp = document.getElementById('mainApp');
-    const alertBox = document.getElementById('authAlertBox');
-
-    // 3. Auth Observer
+    // 3. Silent Anonymous Auth on Load
     auth.onAuthStateChanged(async user => {
       if (user) { 
         currentUserId = user.uid;
-        currentUserEmailPrefix = (user.email ? user.email.split('@')[0] : 'Cosmic');
-        
-        welcomeScreen.style.display = 'none';
-        mainApp.style.display = 'flex';
-        
-        const badge = document.getElementById('authBadgeText');
-        if (badge) badge.innerHTML = `<span>👤 ${currentUserEmailPrefix} ▾</span>`;
-        
         checkUserMembership(currentUserId);
         listenToFeed(); 
       } else {
-        currentUserId = null;
-        currentUserEmailPrefix = '';
-        welcomeScreen.style.display = 'flex';
-        mainApp.style.display = 'none';
-        
-        if (unsubscribeFeed) {
-          unsubscribeFeed();
-          unsubscribeFeed = null;
-        }
+        // Automatically sign in anonymously if not already signed in
+        auth.signInAnonymously().catch(err => {
+          console.error("Anonymous auth failed:", err);
+        });
       }
     });
 
@@ -610,11 +366,8 @@
     });
 
     function checkUserMembership(uid) {
-      // Real-time listener: updates instantly when you edit Firestore
       db.collection('users').doc(uid).onSnapshot(doc => {
         const data = doc.exists ? doc.data() : null;
-        
-        // This handles both boolean (true) and string ("true") safely
         const isMember = data && (data.isMember === true || data.isMember === "true");
 
         userMembershipsCache[uid] = isMember;
@@ -633,7 +386,6 @@
           if (adBanner) adBanner.style.display = 'flex';
         }
 
-        // Re-render the feed so star badges instantly appear on their posts
         renderFeed();
       }, err => {
         console.error("Membership check error:", err);
@@ -657,7 +409,7 @@
       try {
         await db.collection('pending_upgrades').add({
           userId: currentUserId,
-          email: currentUserEmailPrefix,
+          email: 'Anonymous Guest',
           utr: utr,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -672,7 +424,7 @@
                 Your UTR has been securely received.<br><br>
                 Our team will verify the transaction and activate your <strong>Golden Star</strong> within 24 hours.
               </p>
-              <button onclick="document.getElementById('paymentModal').remove()" style="width: 100%; background: var(--text); color: var(--bg); border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 0.95rem; transition: opacity 0.2s;">
+              <button onclick="document.getElementById('paymentModal').remove()" style="width: 100%; background: var(--text); color: var(--bg); border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 0.95rem;">
                 Return to Cosmos
               </button>
             </div>
@@ -680,7 +432,7 @@
         }
       } catch(err) {
         console.error(err);
-        alert('Error submitting UTR. Please try again or email support.');
+        alert('Error submitting UTR. Please try again.');
         if (utrBtn) {
           utrBtn.innerText = "Submit UTR for Verification";
           utrBtn.disabled = false;
@@ -688,14 +440,8 @@
       }
     }
 
-    // ==============================================================
-    // PASTE YOUR NEW PAYPAL CLIENT ID BETWEEN THE QUOTES BELOW
-    // ==============================================================
     const CLIENT_ID = "BAAPBgAGV8ceqij394Pt0XfiVa-zdzpjxmA0laDfJ1tIB9ZjRvosuE-Xpenpecy1Re5MOCGFtAQcNFWoRc";
-    // ==============================================================
 
-
-    // Dynamic Safe Loading Payment Flow
     function handleBecomeMember() {
       const existingMenu = document.getElementById('profileDropdown');
       if (existingMenu) existingMenu.classList.remove('show');
@@ -728,7 +474,6 @@
               </div>
             </div>
 
-            <!-- PAYPAL TOP SECTION -->
             <div style="margin-bottom: 10px; text-align: center;">
               <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px;">FOR INTERNATIONAL USERS ($1.00)</span>
             </div>
@@ -737,14 +482,13 @@
                <span style="font-size: 0.85rem; color: var(--text-muted);">Loading secure checkout...</span>
             </div>
 
-            <!-- UPI BOTTOM SECTION -->
             <div style="margin-bottom: 10px; text-align: center;">
               <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px;">FOR INDIAN USERS (₹89 VIA UPI)</span>
             </div>
             <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; text-align: center; border: 1px solid var(--border);">
               <a href="upi://pay?pa=priyankhudehingia@oksbi&pn=MindCosmos&am=89.00&cu=INR&tn=GoldenStar" 
                  style="display: block; background: #10b981; color: #000; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                 📲 Tap to Pay via UPI App
+                📲 Tap to Pay via UPI App
               </a>
               <img src="qr.jpeg" style="width: 130px; height: 130px; border-radius: 8px; margin-bottom: 8px; border: 2px solid #fff; object-fit: cover;" alt="UPI QR">
               <p style="font-size: 0.8rem; color: #3b82f6; margin-bottom: 16px; font-weight: 600;">priyankhudehingia@oksbi</p>
@@ -762,7 +506,6 @@
 
       const paypalContainer = document.getElementById('paypal-button-container');
 
-      // Function to actually render the buttons
       function renderPayPalButtons() {
         paypalContainer.innerHTML = ''; 
         try {
@@ -780,26 +523,22 @@
                   alert("Payment successful! Your star is minted.");
                   document.getElementById('paymentModal')?.remove();
                   location.reload(); 
-                } catch (err) { alert("Payment recorded! If star does not appear immediately, refresh."); }
+                } catch (err) { alert("Payment recorded! Refresh if needed."); }
               });
             },
             onError: function(err) { alert("Payment process failed. Please try again."); }
-          }).render('#paypal-button-container').catch(err => {
-            console.error("PayPal Render Error:", err);
-            paypalContainer.innerHTML = `<div style="color: #f87171; font-size: 0.8rem; text-align: center; padding: 8px;">PayPal Blocked.<br>Check Adblocker, VPN, or Client ID.</div>`;
-          });
+          }).render('#paypal-button-container');
         } catch(e) {
           paypalContainer.innerHTML = `<div style="color: #f87171; font-size: 0.8rem; text-align: center; padding: 8px;">Error loading PayPal.</div>`;
         }
       }
 
-      // Dynamically inject the script ONLY when the button is clicked
       if (!window.paypal) {
         const script = document.createElement('script');
         script.src = `https://www.paypal.com/sdk/js?client-id=${CLIENT_ID}&currency=USD`;
         script.onload = () => renderPayPalButtons();
         script.onerror = () => {
-          paypalContainer.innerHTML = `<div style="color: #f87171; font-size: 0.85rem; text-align: center; padding: 12px; border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; background: rgba(239,68,68,0.1);">Failed to load PayPal network.<br>Please disable your adblocker.</div>`;
+          paypalContainer.innerHTML = `<div style="color: #f87171; font-size: 0.85rem; text-align: center; padding: 12px;">Failed to load PayPal. Disable adblocker.</div>`;
         };
         document.head.appendChild(script);
       } else {
@@ -807,148 +546,7 @@
       }
     }
 
-    // 4. Authentication Flow
-    function showError(message) {
-      if (alertBox) {
-        alertBox.innerText = message;
-        alertBox.style.display = 'block';
-      }
-    }
-
-    function hideError() {
-      if (alertBox) {
-        alertBox.style.display = 'none';
-        alertBox.innerText = '';
-      }
-    }
-
-    function toggleAuthMode() {
-      isSignUpMode = !isSignUpMode;
-      hideError();
-      
-      const title = isSignUpMode ? "Join the Universe" : "A safe space to cast your thoughts into the universe. Sign in to continue.";
-      document.getElementById('authSubtitle').innerText = title;
-      document.getElementById('authSubmitBtn').innerText = isSignUpMode ? "Create Account" : "Sign In";
-      document.getElementById('authToggleBtn').innerHTML = isSignUpMode ? "Already have an account? <strong>Sign In</strong>" : "Need an account? <strong>Sign Up</strong>";
-      
-      const forgotBtn = document.getElementById('forgotPasswordBtn');
-      if (forgotBtn) forgotBtn.style.display = isSignUpMode ? 'none' : 'block';
-    }
-
-    function setAuthLoading(isLoading) {
-      const btn = document.getElementById('authSubmitBtn');
-      const googleBtn = document.getElementById('googleAuthBtn');
-      const emailInput = document.getElementById('authEmail');
-      const passInput = document.getElementById('authPassword');
-
-      if (btn) btn.disabled = isLoading;
-      if (googleBtn) googleBtn.disabled = isLoading;
-      if (emailInput) emailInput.disabled = isLoading;
-      if (passInput) passInput.disabled = isLoading;
-
-      if (btn) {
-        btn.innerText = isLoading ? (isSignUpMode ? "Creating account..." : "Signing in...") : (isSignUpMode ? "Create Account" : "Sign In");
-      }
-    }
-
-    async function handleAuthSubmit() {
-      const email = document.getElementById('authEmail').value.trim();
-      const password = document.getElementById('authPassword').value.trim();
-      
-      hideError();
-
-      if (!email || !password) {
-        showError("Please enter both email and password.");
-        return;
-      }
-
-      setAuthLoading(true);
-
-      try {
-        if (isSignUpMode) {
-          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-          try {
-            await db.collection('users').doc(userCredential.user.uid).set({
-              email: email,
-              isMember: false,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-          } catch(dbErr) {
-            console.warn("Profile init warning:", dbErr);
-          }
-        } else {
-          await auth.signInWithEmailAndPassword(email, password);
-        }
-      } catch (err) {
-        let message = "Something went wrong. Please try again.";
-        if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-          message = "We couldn't find an account with that email and password.";
-        } else if (err.code === 'auth/wrong-password') {
-          message = "Incorrect password. Please try again.";
-        } else if (err.code === 'auth/email-already-in-use') {
-          message = "An account with this email already exists. Please sign in instead.";
-        } else if (err.code === 'auth/weak-password') {
-          message = "Your password must be at least 6 characters long.";
-        } else if (err.code === 'auth/invalid-email') {
-          message = "Please enter a valid email address.";
-        } else if (err.code === 'auth/too-many-requests') {
-          message = "Too many attempts. Please wait a moment.";
-        }
-        showError(message);
-      } finally {
-        setAuthLoading(false);
-      }
-    }
-
-    const googleProvider = new firebase.auth.GoogleAuthProvider();
-
-    async function handleGoogleSignIn() {
-      hideError();
-      setAuthLoading(true);
-      try {
-        const userCredential = await auth.signInWithPopup(googleProvider);
-        try {
-          await db.collection('users').doc(userCredential.user.uid).set({
-            email: userCredential.user.email,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge: true });
-        } catch(e) {}
-      } catch (err) {
-        if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
-          showError("Google sign-in failed. Please try again.");
-        }
-      } finally {
-        setAuthLoading(false);
-      }
-    }
-
-    async function handleForgotPassword() {
-      const email = document.getElementById('authEmail').value.trim();
-      hideError();
-
-      if (!email) {
-        showError("Please enter your email address in the box first.");
-        return;
-      }
-
-      setAuthLoading(true);
-      try {
-        await auth.sendPasswordResetEmail(email);
-        alert(`Password reset link sent to ${email}.`);
-      } catch (err) {
-        showError("Error sending reset email. Verify email is correct.");
-      } finally {
-        setAuthLoading(false);
-      }
-    }
-
-    function handleSignOut() {
-      if (confirm("Are you sure you want to sign out?")) {
-        auth.signOut();
-      }
-    }
-
-    // 5. App Feed & Interactivity
+    // 4. App Feed & Interactivity
     function scrollFilters(amount) { document.getElementById('filterBar').scrollBy({ left: amount, behavior: 'smooth' }); }
     function scrollPicker(amount) { document.getElementById('emotionPicker').scrollBy({ left: amount, behavior: 'smooth' }); }
 
@@ -1102,19 +700,14 @@
     async function handleDeleteQuestion(qId) {
       if (!confirm("Delete this thought?")) return;
       try { 
-        // 1. Catch all the ghost replies hiding in the subcollection
         const answersSnapshot = await db.collection('questions').doc(qId).collection('answers').get();
-        
-        // 2. Delete all replies first using a batch
         const batch = db.batch();
         answersSnapshot.forEach(doc => batch.delete(doc.ref));
         await batch.commit();
-
-        // 3. Finally, delete the main thought itself
         await db.collection('questions').doc(qId).delete(); 
       } catch (err) { 
         console.error("Delete error:", err);
-        alert("Failed to delete. Please try again."); 
+        alert("Failed to delete."); 
       }
     }
 
@@ -1165,7 +758,6 @@
               dateObj = reply.createdAt.toDate();
             }
             
-            // Check if the person replying is a Golden Member
             const isReplyMember = userMembershipsCache[reply.authorId] === true;
             
             const el = document.createElement('div');
