@@ -626,6 +626,10 @@
         }
       } catch (err) {
         console.error("Membership check error:", err);
+        // FIX: Force ad to display even if read fails due to rules
+        userMembershipsCache[uid] = false;
+        const adBanner = document.getElementById('premiumAdBanner');
+        if (adBanner) adBanner.style.display = 'flex';
       }
     }
 
