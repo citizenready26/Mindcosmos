@@ -535,7 +535,7 @@
   </div>
 
   <script>
-    // 1. All Global State Variables (Hoisted Cleanly)
+    // 1. All Global State Variables
     let currentUserId = null;
     let currentUserEmailPrefix = '';
     let isSignUpMode = false;
@@ -545,6 +545,7 @@
     let userInteractedQuestionIds = new Set();
     let unsubscribeFeed = null;
     let activeReplyListeners = {};
+    let isPayPalRendered = false; // Prevents re-rendering bug
 
     // 2. Firebase Initialization
     const firebaseConfig = {
@@ -565,7 +566,7 @@
     const mainApp = document.getElementById('mainApp');
     const alertBox = document.getElementById('authAlertBox');
 
-    // 3. Auth Observer (Direct Entry - No Email Verification Blocker)
+    // 3. Auth Observer
     auth.onAuthStateChanged(async user => {
       if (user) { 
         currentUserId = user.uid;
@@ -626,7 +627,6 @@
         }
       } catch (err) {
         console.error("Membership check error:", err);
-        // FIX: Force ad to display even if read fails due to rules
         userMembershipsCache[uid] = false;
         const adBanner = document.getElementById('premiumAdBanner');
         if (adBanner) adBanner.style.display = 'flex';
@@ -681,13 +681,72 @@
       }
     }
 
+    // PayPal Tab Switching Logic
+    function switchPaymentTab(tab) {
+      const upiSec = document.getElementById('upi-section');
+      const paypalSec = document.getElementById('paypal-section');
+      const upiTab = document.getElementById('tab-upi');
+      const paypalTab = document.getElementById('tab-paypal');
+
+      if (!upiSec || !paypalSec) return;
+
+      if (tab === 'paypal') {
+        // Show container first so PayPal SDK can calculate its dimensions
+        upiSec.style.display = 'none';
+        paypalSec.style.display = 'block';
+        
+        paypalTab.style.background = 'var(--surface)';
+        paypalTab.style.color = 'var(--text)';
+        upiTab.style.background = 'transparent';
+        upiTab.style.color = 'var(--text-muted)';
+        upiTab.style.border = 'none';
+
+        // Render PayPal ONLY if it hasn't been rendered yet
+        if (!isPayPalRendered && window.paypal) {
+          try {
+            paypal.Buttons({
+              style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
+              createOrder: function(data, actions) {
+                return actions.order.create({
+                  purchase_units: [{ amount: { value: '1.00' }, description: 'MindCosmos Golden Membership', custom_id: currentUserId }]
+                });
+              },
+              onApprove: function(data, actions) {
+                return actions.order.capture().then(async function(details) {
+                  try {
+                    await db.collection('users').doc(currentUserId).update({ isMember: true });
+                    alert("Payment successful! Your star is minted.");
+                    document.getElementById('paymentModal')?.remove();
+                    location.reload(); 
+                  } catch (err) { alert("Payment recorded! If star does not appear immediately, refresh."); }
+                });
+              },
+              onError: function(err) { alert("Payment process failed. Please try again."); }
+            }).render('#paypal-button-container');
+            isPayPalRendered = true; // Mark as rendered
+          } catch(e) { console.warn("PayPal initialization fallback:", e); }
+        }
+      } else {
+        upiSec.style.display = 'block';
+        paypalSec.style.display = 'none';
+        
+        upiTab.style.background = 'var(--surface)';
+        upiTab.style.color = 'var(--text)';
+        upiTab.style.border = '1px solid var(--border)';
+        paypalTab.style.background = 'transparent';
+        paypalTab.style.color = 'var(--text-muted)';
+      }
+    }
+
     function handleBecomeMember() {
       const existingMenu = document.getElementById('profileDropdown');
       if (existingMenu) existingMenu.classList.remove('show');
-
+      
       const existingModal = document.getElementById('paymentModal');
       if (existingModal) existingModal.remove();
       
+      isPayPalRendered = false; // Reset state for a fresh modal
+
       const modalHtml = `
         <div id="paymentModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(9, 11, 16, 0.85); backdrop-filter: blur(6px); z-index:2000; display:flex; align-items:center; justify-content:center;">
           <div style="background:var(--surface); padding:32px 24px; border-radius:24px; border:1px solid var(--border); width:90%; max-width:400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); max-height: 90vh; overflow-y: auto;">
@@ -716,9 +775,8 @@
 
             <!-- PAYMENT TABS -->
             <div style="display: flex; gap: 4px; margin-bottom: 16px; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 12px; border: 1px solid var(--border);">
-              <button id="tab-upi" onclick="document.getElementById('upi-section').style.display='block'; document.getElementById('paypal-section').style.display='none'; this.style.background='var(--surface)'; this.style.color='var(--text)'; document.getElementById('tab-paypal').style.background='transparent'; document.getElementById('tab-paypal').style.color='var(--text-muted)';" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: 0.2s;">🇮🇳 UPI (₹89)</button>
-              
-              <button id="tab-paypal" onclick="document.getElementById('upi-section').style.display='none'; document.getElementById('paypal-section').style.display='block'; this.style.background='var(--surface)'; this.style.color='var(--text)'; document.getElementById('tab-upi').style.background='transparent'; document.getElementById('tab-upi').style.color='var(--text-muted)'; document.getElementById('tab-upi').style.border='none';" style="flex: 1; padding: 10px; border-radius: 10px; border: none; background: transparent; color: var(--text-muted); font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: 0.2s;">🌍 PayPal ($1)</button>
+              <button id="tab-upi" onclick="switchPaymentTab('upi')" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: 0.2s;">🇮🇳 UPI (₹89)</button>
+              <button id="tab-paypal" onclick="switchPaymentTab('paypal')" style="flex: 1; padding: 10px; border-radius: 10px; border: none; background: transparent; color: var(--text-muted); font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: 0.2s;">🌍 PayPal ($1)</button>
             </div>
 
             <!-- UPI SECTION (DEFAULT) -->
@@ -730,7 +788,6 @@
                 </a>
                 <img src="qr.jpeg" style="width: 130px; height: 130px; border-radius: 8px; margin-bottom: 8px; border: 2px solid #fff; object-fit: cover;" alt="UPI QR">
                 <p style="font-size: 0.8rem; color: #3b82f6; margin-bottom: 16px; font-weight: 600;">priyankhudehingia@oksbi</p>
-                
                 <input type="text" id="upiUtr" placeholder="Enter 12-digit UTR No." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; margin-bottom: 12px; text-align: center; font-size: 0.9rem;">
                 <button onclick="submitUtr()" style="width: 100%; background: var(--text); color: var(--bg); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer;">
                   Submit UTR for Verification
@@ -748,46 +805,6 @@
         </div>
       `;
       document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-      // Safe PayPal Initializer
-      if (window.paypal && typeof paypal.Buttons === 'function') {
-        try {
-          paypal.Buttons({
-            style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
-            createOrder: function(data, actions) {
-              return actions.order.create({
-                purchase_units: [{
-                  amount: { value: '1.00' },
-                  description: 'MindCosmos Golden Membership',
-                  custom_id: currentUserId 
-                }]
-              });
-            },
-            onApprove: function(data, actions) {
-              return actions.order.capture().then(async function(details) {
-                try {
-                  await db.collection('users').doc(currentUserId).update({
-                    isMember: true
-                  });
-                  alert("Payment successful! Your star is minted.");
-                  const modal = document.getElementById('paymentModal');
-                  if (modal) modal.remove();
-                  location.reload(); 
-                } catch (err) {
-                  console.error("Upgrade error:", err);
-                  alert("Payment recorded! If star does not appear immediately, refresh.");
-                }
-              });
-            },
-            onError: function(err) {
-              console.error("PayPal Error:", err);
-              alert("Payment process failed. Please try again.");
-            }
-          }).render('#paypal-button-container');
-        } catch(e) {
-          console.warn("PayPal initialization fallback:", e);
-        }
-      }
     }
 
     // 4. Authentication Flow
